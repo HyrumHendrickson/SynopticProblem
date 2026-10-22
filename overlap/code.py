@@ -49,8 +49,8 @@ MARK_PATH = os.path.join(TEXT_DIR, "62-Mk-morphgnt.txt")
 LUKE_PATH = os.path.join(TEXT_DIR, "63-Lk-morphgnt.txt")
 OUTPUT_PATH = os.path.join(SCRIPT_DIR, "synoptic_overlaps.txt")  # saved next to this script
 
-WINDOW = 15            # words per block (see CONTENT_WINDOW)
-THRESHOLD = 15         # shared words required within a block
+WINDOW = 20            # words per block (see CONTENT_WINDOW)
+THRESHOLD = 7          # shared words required within a block
 FIELD = "lemma"        # "lemma" (dictionary form) or "norm" (normalized form)
 CONTENT_ONLY = True    # True ignores articles, conjunctions, prepositions, etc.
 CONTENT_WINDOW = True  # True: a window is WINDOW non-excluded words, so it may
