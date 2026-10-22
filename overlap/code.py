@@ -4,8 +4,11 @@ Find sections shared between Matthew, Mark, and Luke (MorphGNT format).
 
 Definition of a match:
   Two windows (from different books) match if they share at least THRESHOLD
-  words, counted as a multiset intersection (a word repeated twice in both
-  windows counts twice; once in either counts once). Word order is ignored.
+  words. With IGNORE_WORD_ORDER = True this is a multiset intersection (a word
+  repeated twice in both windows counts twice; once in either counts once) and
+  order is ignored. With IGNORE_WORD_ORDER = False the shared words must also
+  occur in the same relative order (longest common subsequence), though not
+  necessarily contiguously.
 
 Window size:
   By default (CONTENT_WINDOW = True, with CONTENT_ONLY = True) a window is
@@ -28,6 +31,7 @@ Usage:
                              [--threshold 5] [--field norm|lemma]
                              [--content-only | --no-content-only]
                              [--content-window | --no-content-window]
+                             [--ignore-word-order | --no-ignore-word-order]
 """
 import argparse
 import os
@@ -50,12 +54,15 @@ LUKE_PATH = os.path.join(TEXT_DIR, "63-Lk-morphgnt.txt")
 OUTPUT_PATH = os.path.join(SCRIPT_DIR, "synoptic_overlaps.txt")  # saved next to this script
 
 WINDOW = 20            # words per block (see CONTENT_WINDOW)
-THRESHOLD = 7          # shared words required within a block
+THRESHOLD = 18          # shared words required within a block
 FIELD = "lemma"        # "lemma" (dictionary form) or "norm" (normalized form)
 CONTENT_ONLY = True    # True ignores articles, conjunctions, prepositions, etc.
 CONTENT_WINDOW = True  # True: a window is WINDOW non-excluded words, so it may
                        # span more raw words. False: WINDOW consecutive raw words.
                        # Only has an effect when CONTENT_ONLY is True.
+IGNORE_WORD_ORDER = True  # True: shared words counted as a multiset, order ignored.
+                          # False: shared words must appear in the same relative
+                          # order (longest common subsequence >= THRESHOLD).
 # ---------------------------------------------------------------------------
 
 BOOKS = [
@@ -88,13 +95,26 @@ def load(path, field_idx, content_only, vocab):
     return refs, texts, np.array(ids, dtype=np.int32)
 
 
-def window_overlap(a_slice, b_slice):
-    ca = Counter(x for x in a_slice if x >= 0)
-    cb = Counter(x for x in b_slice if x >= 0)
-    return sum(min(n, cb[w]) for w, n in ca.items() if w in cb)
+def window_overlap(a_slice, b_slice, ignore_order=True):
+    if ignore_order:
+        ca = Counter(x for x in a_slice if x >= 0)
+        cb = Counter(x for x in b_slice if x >= 0)
+        return sum(min(n, cb[w]) for w, n in ca.items() if w in cb)
+    # Order respected: longest common subsequence over matchable words.
+    # Excluded words (-1) can never match, so dropping them does not change
+    # the result.
+    a = [int(x) for x in a_slice if x >= 0]
+    b = [int(x) for x in b_slice if x >= 0]
+    prev = [0] * (len(b) + 1)
+    for x in a:
+        cur = [0]
+        for k, y in enumerate(b, 1):
+            cur.append(prev[k - 1] + 1 if x == y else max(prev[k], cur[k - 1]))
+        prev = cur
+    return prev[-1]
 
 
-def find_pairs(a, b, win, thr):
+def find_pairs(a, b, win, thr, ignore_order=True):
     """Return list of (i, j) where a[i:i+win] and b[j:j+win] share >= thr words."""
     na, nb = len(a), len(b)
     if na < win or nb < win:
@@ -112,8 +132,8 @@ def find_pairs(a, b, win, thr):
         c = np.concatenate(([0], np.cumsum(s, dtype=np.int32)))
         w = c[win:] - c[:-win]  # pair-count upper bound for each j
         for j in np.nonzero(w >= thr)[0]:
-            # exact multiset check (pair-count overcounts repeated words)
-            if window_overlap(a[i:i + win], b[j:j + win]) >= thr:
+            # exact check (pair-count overcounts repeated words; LCS also enforces order)
+            if window_overlap(a[i:i + win], b[j:j + win], ignore_order) >= thr:
                 pairs.append((i, int(j)))
         if i + win < na:
             s += eq(i + win)
@@ -157,6 +177,11 @@ def main():
     ap.add_argument("--content-window", action=argparse.BooleanOptionalAction, default=CONTENT_WINDOW,
                     help="make each window WINDOW non-excluded words, so it may "
                          "span more raw words (needs --content-only; on by default)")
+    ap.add_argument("--ignore-word-order", action=argparse.BooleanOptionalAction,
+                    default=IGNORE_WORD_ORDER,
+                    help="count shared words regardless of order (default); "
+                         "--no-ignore-word-order requires them in the same "
+                         "relative order (longest common subsequence)")
     args, _ = ap.parse_known_args()
 
     if args.content_window and not args.content_only:
@@ -196,7 +221,8 @@ def main():
     last = args.window - 1
     for A, B in pair_names:
         print("Comparing %s and %s ..." % (A, B))
-        pairs = find_pairs(mids[A], mids[B], args.window, args.threshold)
+        pairs = find_pairs(mids[A], mids[B], args.window, args.threshold,
+                           args.ignore_word_order)
         print("  %d matching window pairs" % len(pairs))
         window_pairs[(A, B)] = pairs
         covs[(A, B)] = np.zeros(len(data[A][2]), dtype=bool)
@@ -219,11 +245,12 @@ def main():
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     total = 0
     with open(out_path, "w", encoding="utf-8") as out:
-        out.write("Window: %d %s | Threshold: %d shared words | Compared on: %s%s\n"
+        out.write("Window: %d %s | Threshold: %d shared words | Compared on: %s%s | Word order: %s\n"
                   % (args.window,
                      "non-excluded words (may span more raw words)" if use_cw else "raw words",
                      args.threshold, args.field,
-                     " (content words only)" if args.content_only else ""))
+                     " (content words only)" if args.content_only else "",
+                     "ignored" if args.ignore_word_order else "respected (LCS)"))
         out.write("Each section pairs the passages that matched each other.\n")
         out.write("'[also shares text with X]' means part of that passage also "
                   "matches the third book X in a separate comparison.\n\n")

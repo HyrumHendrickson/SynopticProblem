@@ -9,7 +9,8 @@ Inputs
         Matthew 2:13 (19 words) @667-685:
         Matthew 2:13 (19 words, 10 non-excluded) @667-685:
     The second appears when the overlap script's content-window option is on
-    (its default).
+    (its default). The overlap file's first line records the settings used,
+    including whether word order was ignored; it is echoed in the report.
   - The three MorphGNT files, used only to get each book's total words,
     chapters, and verses so percentages have a denominator.
 
@@ -41,10 +42,12 @@ from difflib import SequenceMatcher
 # SETTINGS: edit these paths, then press Run. Use raw strings (r"...").
 # ---------------------------------------------------------------------------
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-OVERLAP_DIR = os.path.join(SCRIPT_DIR, "..", "overlap")   # relative to this script
 TEXT_DIR = os.path.join(SCRIPT_DIR, "..", "Text", "sblgnt")
 
-OVERLAP_PATH = os.path.join(OVERLAP_DIR, "synoptic_overlaps.txt")  # change filename if needed
+# synoptic_overlap.py saves its output next to itself by default. If that file
+# is not found, the "overlap" folder beside this script's parent is tried.
+OVERLAP_PATH = os.path.join(SCRIPT_DIR, "synoptic_overlaps.txt")   # change filename if needed
+FALLBACK_OVERLAP_PATH = os.path.join(SCRIPT_DIR, "..", "overlap", "synoptic_overlaps.txt")
 MATTHEW_PATH = os.path.join(TEXT_DIR, "61-Mt-morphgnt.txt")
 MARK_PATH = os.path.join(TEXT_DIR, "62-Mk-morphgnt.txt")
 LUKE_PATH = os.path.join(TEXT_DIR, "63-Lk-morphgnt.txt")
@@ -912,6 +915,12 @@ def main():
     ap.add_argument("--images", action=argparse.BooleanOptionalAction, default=MAKE_IMAGES,
                     help="create chart images (needs matplotlib)")
     args, _ = ap.parse_known_args()
+
+    # If the overlap file is not where expected, try the fallback location.
+    if (not os.path.exists(os.path.expanduser(args.overlap))
+            and args.overlap == OVERLAP_PATH
+            and os.path.exists(FALLBACK_OVERLAP_PATH)):
+        args.overlap = FALLBACK_OVERLAP_PATH
 
     paths = {"overlap file": args.overlap, "Matthew": args.matthew,
              "Mark": args.mark, "Luke": args.luke}
