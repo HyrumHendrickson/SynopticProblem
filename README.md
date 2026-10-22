@@ -1,5 +1,5 @@
 # SynopticProblem
-
+https://hyrumhendrickson.github.io/SynopticProblem
 
 
 
