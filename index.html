@@ -7,10 +7,10 @@
 <style>
 :root{
   --bg:#f6f4ef;--surface:#ffffff;--ink:#1c2430;--muted:#5d6877;--line:#dcd8cd;
-  --accent:#1f3a5f;--accent-soft:#e8edf4;--gold:#9a7b3c;--shadow:0 1px 2px rgba(20,30,50,.06),0 8px 24px rgba(20,30,50,.06);
+  --accent:#1f3a5f;--accent-soft:#e8edf4;--gold:#9a7b3c;--warn:#8a2c2c;--shadow:0 1px 2px rgba(20,30,50,.06),0 8px 24px rgba(20,30,50,.06);
 }
 @media (prefers-color-scheme:dark){
-  :root{--bg:#12161d;--surface:#1a202a;--ink:#e8e6e0;--muted:#98a2b1;--line:#2b3340;--accent:#8fb0dd;--accent-soft:#222c3b;--gold:#c9a95e;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3)}
+  :root{--bg:#12161d;--surface:#1a202a;--ink:#e8e6e0;--muted:#98a2b1;--line:#2b3340;--accent:#8fb0dd;--accent-soft:#222c3b;--gold:#c9a95e;--warn:#e0928f;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3)}
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -23,9 +23,10 @@ h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font
 .lede{max-width:760px;color:var(--muted);margin:0;font-size:17px}
 main{padding:28px 0 56px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
-.controls{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:28px;padding:24px 28px;margin-bottom:22px}
-.ctl label{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:10px}
+.controls{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:26px 28px;padding:24px 28px;margin-bottom:22px}
+.ctl label,.ctl .lab{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:10px}
 .ctl .val{font-family:Georgia,serif;font-size:22px;letter-spacing:0;text-transform:none;color:var(--accent);font-weight:600}
+.ctl.toggles{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;padding-top:22px;border-top:1px solid var(--line)}
 select{width:100%;padding:11px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:7px;appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235d6877' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
 select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -34,8 +35,14 @@ input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--lin
 input[type=range]::-moz-range-track{height:4px;background:var(--line);border-radius:2px}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 1px var(--accent);margin-top:-8px;cursor:pointer}
 input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 1px var(--accent);cursor:pointer}
+input[type=range]:disabled{opacity:.4}
 .ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
 .hint{font-size:12px;color:var(--muted);margin-top:6px;min-height:18px}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--bg)}
+.seg button{border:0;border-radius:0;background:transparent;padding:10px 8px;font-size:14px;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--surface);font-weight:600}
+.seg button:hover:not([aria-pressed=true]){background:var(--accent-soft);color:var(--accent)}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
 .stage{padding:18px 18px 14px}
 .stage-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:2px 6px 14px}
@@ -49,7 +56,9 @@ button:hover{border-color:var(--accent);color:var(--accent)}
 .spinner{position:absolute;width:26px;height:26px;border:3px solid #ddd;border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;display:none}
 .imgbox.busy .spinner{display:block}
 @keyframes s{to{transform:rotate(360deg)}}
-.err{display:none;padding:30px;text-align:center;color:#8a2c2c;font-size:14px}
+@media (prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}.imgbox img{transition:none}}
+.msg{display:none;padding:30px;text-align:center;color:#6b2424;font-size:14px;max-width:520px}
+.msg.show{display:block}
 .caption{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--muted);padding:12px 6px 2px}
 .caption a{color:var(--accent);text-decoration:none}
 .caption a:hover{text-decoration:underline}
@@ -68,17 +77,20 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600
 .def b{color:var(--ink)}
 footer{border-top:1px solid var(--line);padding:26px 0 40px;font-size:13px;color:var(--muted)}
 footer a{color:var(--accent)}
+footer p{margin:0 0 6px}
 dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:96vh}
 dialog::backdrop{background:rgba(10,14,20,.8)}
 dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;display:block}
-@media(max-width:980px){.controls{grid-template-columns:1fr;gap:20px}.layout{grid-template-columns:1fr}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media(max-width:980px){.controls{grid-template-columns:1fr;gap:20px}.ctl.toggles{grid-template-columns:1fr;gap:20px}.layout{grid-template-columns:1fr}}
 </style>
+<script src="examples/manifest.js"></script>
 </head>
 <body>
 <header><div class="wrap hero">
   <div class="eyebrow">Computational Textual Criticism</div>
   <h1>The Synoptic Problem: Lexical Overlap Explorer</h1>
-  <p class="lede">Shared passages among Matthew, Mark, and Luke, detected in the SBLGNT/MorphGNT text by sliding windows of lemmatized content words. Vary the window size and match threshold to see how each analysis responds.</p>
+  <p class="lede">Shared passages among Matthew, Mark, and Luke, detected in the SBLGNT/MorphGNT text by sliding windows. Vary the window size and match threshold, and switch word order, comparison form, and word class, to see how each analysis responds.</p>
 </div></header>
 
 <main class="wrap">
@@ -92,13 +104,39 @@ dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;disp
       <label for="win">Window size <span class="val" id="winVal"></span></label>
       <input type="range" id="win" min="0" value="0">
       <div class="ticks" id="winTicks"></div>
-      <div class="hint">Non-excluded words per block</div>
+      <div class="hint" id="winHint"></div>
     </div>
     <div class="ctl">
       <label for="thr">Threshold <span class="val" id="thrVal"></span></label>
       <input type="range" id="thr" min="0" value="0">
       <div class="ticks"><span id="thrMin"></span><span id="thrMax"></span></div>
       <div class="hint">Shared words required to match</div>
+    </div>
+    <div class="ctl toggles">
+      <div>
+        <div class="lab">Word order</div>
+        <div class="seg" role="group" aria-label="Word order" data-key="o">
+          <button type="button" data-v="0">Ignored</button>
+          <button type="button" data-v="1">Respected</button>
+        </div>
+        <div class="hint" id="hintO"></div>
+      </div>
+      <div>
+        <div class="lab">Compared on</div>
+        <div class="seg" role="group" aria-label="Compared on" data-key="f">
+          <button type="button" data-v="lemma">Lemma</button>
+          <button type="button" data-v="norm">Normalized form</button>
+        </div>
+        <div class="hint" id="hintF"></div>
+      </div>
+      <div>
+        <div class="lab">Words included</div>
+        <div class="seg" role="group" aria-label="Words included" data-key="k">
+          <button type="button" data-v="1">Content only</button>
+          <button type="button" data-v="0">All words</button>
+        </div>
+        <div class="hint" id="hintK"></div>
+      </div>
     </div>
   </section>
 
@@ -114,7 +152,7 @@ dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;disp
       <div class="imgbox" id="box">
         <div class="spinner"></div>
         <img id="img" alt="">
-        <div class="err" id="err">Image not found. Place this file at the repository root so that the <code>examples/</code> directory is alongside it.</div>
+        <div class="msg" id="msg" role="status"></div>
       </div>
       <div class="caption">
         <span id="cap"></span>
@@ -125,12 +163,12 @@ dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;disp
     <aside>
       <div class="panel card">
         <h3>Sections identified</h3>
-        <div class="big" id="secTotal"></div>
+        <div class="big" id="secTotal">&ndash;</div>
         <div class="sub">across all three book pairs</div>
         <table>
-          <tr><td>Matthew &ndash; Mark</td><td id="s1"></td></tr>
-          <tr><td>Matthew &ndash; Luke</td><td id="s2"></td></tr>
-          <tr><td>Mark &ndash; Luke</td><td id="s3"></td></tr>
+          <tr><td>Matthew &ndash; Mark</td><td id="s1">&ndash;</td></tr>
+          <tr><td>Matthew &ndash; Luke</td><td id="s2">&ndash;</td></tr>
+          <tr><td>Mark &ndash; Luke</td><td id="s3">&ndash;</td></tr>
         </table>
       </div>
       <div class="panel card">
@@ -140,109 +178,263 @@ dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;disp
       </div>
       <div class="panel card">
         <h3>Method</h3>
-        <div class="def">Two windows from different books match when they share at least the <b>threshold</b> number of lemmas, counted as a multiset intersection. Articles, conjunctions, prepositions, particles, and pronouns are excluded. Word order is ignored.</div>
+        <div class="def" id="method"></div>
       </div>
     </aside>
   </div>
 </main>
 
 <footer><div class="wrap">
-  Source: <a href="https://github.com/HyrumHendrickson/SynopticProblem" target="_blank" rel="noopener">HyrumHendrickson/SynopticProblem</a>. Greek text: SBLGNT, ed. Michael W. Holmes (CC BY 4.0). Morphological data: MorphGNT (CC BY-SA 4.0).
+  <p id="avail"></p>
+  <p>Source: <a href="https://github.com/HyrumHendrickson/SynopticProblem" target="_blank" rel="noopener">HyrumHendrickson/SynopticProblem</a>. Greek text: SBLGNT, ed. Michael W. Holmes (CC BY 4.0). Morphological data: MorphGNT (CC BY-SA 4.0).</p>
 </div></footer>
 
 <dialog id="dlg"><img id="big" alt=""></dialog>
 
 <script>
-const META = {"5-3":{"dir":"examples/WIndow05/Threshold03","sections":[12781,3603,5772,3406],"heads":{"Luke>Mark":55.67,"Mark>Matthew":86.59,"Matthew>Luke":71.13,"Mark>Luke":73.6,"Matthew>Mark":66.38,"Luke>Matthew":65.62}},"5-4":{"dir":"examples/WIndow05/Threshold04","sections":[1192,426,475,291],"heads":{"Luke>Mark":17.67,"Mark>Matthew":50.43,"Matthew>Luke":27.64,"Mark>Luke":29.19,"Matthew>Mark":31.75,"Luke>Matthew":24.93}},"5-5":{"dir":"examples/WIndow05/Threshold05","sections":[364,151,137,76],"heads":{"Luke>Mark":5.03,"Mark>Matthew":17.85,"Matthew>Luke":9.62,"Mark>Luke":8.9,"Matthew>Mark":10.9,"Luke>Matthew":8.36}},"10-4":{"dir":"examples/WIndow10/Threshold04","sections":[15095,4133,6861,4101],"heads":{"Luke>Mark":80.66,"Mark>Matthew":96.63,"Matthew>Luke":91.07,"Mark>Luke":92.76,"Matthew>Mark":84.12,"Luke>Matthew":88.09}},"10-5":{"dir":"examples/WIndow10/Threshold05","sections":[2425,650,1124,651],"heads":{"Luke>Mark":47.17,"Mark>Matthew":86.02,"Matthew>Luke":65.67,"Mark>Luke":67.71,"Matthew>Mark":59.7,"Luke>Matthew":59.07}},"10-6":{"dir":"examples/WIndow10/Threshold06","sections":[596,196,251,149],"heads":{"Luke>Mark":26.29,"Mark>Matthew":71.32,"Matthew>Luke":38.78,"Mark>Luke":43.88,"Matthew>Mark":44.71,"Luke>Matthew":35.51}},"10-7":{"dir":"examples/WIndow10/Threshold07","sections":[352,145,118,89],"heads":{"Luke>Mark":16.09,"Mark>Matthew":54.87,"Matthew>Luke":24.03,"Mark>Luke":28.7,"Matthew>Mark":33.35,"Luke>Matthew":22.43}},"10-8":{"dir":"examples/WIndow10/Threshold08","sections":[268,121,87,60],"heads":{"Luke>Mark":9.57,"Mark>Matthew":38.34,"Matthew>Luke":16.2,"Mark>Luke":17.01,"Matthew>Mark":22.99,"Luke>Matthew":14.75}},"10-9":{"dir":"examples/WIndow10/Threshold09","sections":[170,80,59,31],"heads":{"Luke>Mark":4.32,"Mark>Matthew":20.96,"Matthew>Luke":9.61,"Mark>Luke":7.86,"Matthew>Mark":12.69,"Luke>Matthew":8.58}},"10-10":{"dir":"examples/WIndow10/Threshold10","sections":[73,29,26,18],"heads":{"Luke>Mark":2.03,"Mark>Matthew":6.33,"Matthew>Luke":3.44,"Mark>Luke":3.62,"Matthew>Mark":3.9,"Luke>Matthew":3.19}},"15-5":{"dir":"examples/Window15/Threshold05","sections":[13957,3759,6415,3783],"heads":{"Luke>Mark":89.11,"Mark>Matthew":98.89,"Matthew>Luke":94.95,"Mark>Luke":97.06,"Matthew>Mark":91.19,"Luke>Matthew":93.38}},"15-6":{"dir":"examples/Window15/Threshold06","sections":[3673,954,1742,977],"heads":{"Luke>Mark":65.94,"Mark>Matthew":94.24,"Matthew>Luke":82.15,"Mark>Luke":85.24,"Matthew>Mark":73.56,"Luke>Matthew":77.89}},"15-7":{"dir":"examples/Window15/Threshold07","sections":[937,255,437,245],"heads":{"Luke>Mark":41.8,"Mark>Matthew":85.44,"Matthew>Luke":62.01,"Mark>Luke":67.2,"Matthew>Mark":57.17,"Luke>Matthew":57.15}},"15-8":{"dir":"examples/Window15/Threshold08","sections":[398,125,172,101],"heads":{"Luke>Mark":29.03,"Mark>Matthew":76.88,"Matthew>Luke":44.08,"Mark>Luke":49.75,"Matthew>Mark":48.21,"Luke>Matthew":40.58}},"15-9":{"dir":"examples/Window15/Threshold09","sections":[258,91,103,64],"heads":{"Luke>Mark":21.91,"Mark>Matthew":68.89,"Matthew>Luke":32.12,"Mark>Luke":38.26,"Matthew>Mark":41.96,"Luke>Matthew":29.95}},"15-10":{"dir":"examples/Window15/Threshold10","sections":[223,88,83,52],"heads":{"Luke>Mark":15.89,"Mark>Matthew":57.22,"Matthew>Luke":24.46,"Mark>Luke":28.67,"Matthew>Mark":34.37,"Luke>Matthew":22.95}},"15-11":{"dir":"examples/Window15/Threshold11","sections":[178,75,64,39],"heads":{"Luke>Mark":10.31,"Mark>Matthew":43.9,"Matthew>Luke":17.61,"Mark>Luke":18.63,"Matthew>Mark":26.52,"Luke>Matthew":16.86}},"15-12":{"dir":"examples/Window15/Threshold12","sections":[142,66,45,31],"heads":{"Luke>Mark":7.5,"Mark>Matthew":31.38,"Matthew>Luke":12.49,"Mark>Luke":13.18,"Matthew>Mark":19.05,"Luke>Matthew":11.9}},"15-13":{"dir":"examples/Window15/Threshold13","sections":[99,40,35,24],"heads":{"Luke>Mark":4.4,"Mark>Matthew":17.5,"Matthew>Luke":8.16,"Mark>Luke":7.68,"Matthew>Mark":10.79,"Luke>Matthew":7.63}},"15-14":{"dir":"examples/Window15/Threshold14","sections":[48,23,19,6],"heads":{"Luke>Mark":1.17,"Mark>Matthew":8.49,"Matthew>Luke":3.82,"Mark>Luke":2.12,"Matthew>Mark":5.19,"Luke>Matthew":3.49}},"15-15":{"dir":"examples/Window15/Threshold15","sections":[20,9,8,3],"heads":{"Luke>Mark":0.5,"Mark>Matthew":2.59,"Matthew>Luke":1.31,"Mark>Luke":0.87,"Matthew>Mark":1.57,"Luke>Matthew":1.18}},"20-7":{"dir":"examples/Window20/Threshold07","sections":[4479,1170,2128,1181],"heads":{"Luke>Mark":75.83,"Mark>Matthew":97.04,"Matthew>Luke":90.32,"Mark>Luke":91.94,"Matthew>Mark":83.38,"Luke>Matthew":86.53}},"20-8":{"dir":"examples/Window20/Threshold08","sections":[1367,363,655,349],"heads":{"Luke>Mark":56.28,"Mark>Matthew":92.69,"Matthew>Luke":75.27,"Mark>Luke":80.74,"Matthew>Mark":67.59,"Luke>Matthew":70.69}},"20-9":{"dir":"examples/Window20/Threshold09","sections":[523,145,238,140],"heads":{"Luke>Mark":39.46,"Mark>Matthew":87.59,"Matthew>Luke":59.54,"Mark>Luke":66.56,"Matthew>Mark":57.03,"Luke>Matthew":54.95}},"20-10":{"dir":"examples/Window20/Threshold10","sections":[303,84,137,82],"heads":{"Luke>Mark":30.29,"Mark>Matthew":80.53,"Matthew>Luke":47.83,"Mark>Luke":54.75,"Matthew>Mark":50.97,"Luke>Matthew":44.29}},"20-11":{"dir":"examples/Window20/Threshold11","sections":[211,70,86,55],"heads":{"Luke>Mark":24.76,"Mark>Matthew":73.86,"Matthew>Luke":36.58,"Mark>Luke":44.82,"Matthew>Mark":45.75,"Luke>Matthew":34.33}},"20-12":{"dir":"examples/Window20/Threshold12","sections":[185,70,71,44],"heads":{"Luke>Mark":20.61,"Mark>Matthew":67.75,"Matthew>Luke":29.42,"Mark>Luke":36.36,"Matthew>Mark":41.44,"Luke>Matthew":27.42}},"20-13":{"dir":"examples/Window20/Threshold13","sections":[157,62,57,38],"heads":{"Luke>Mark":15.42,"Mark>Matthew":58.41,"Matthew>Luke":21.86,"Mark>Luke":27.77,"Matthew>Mark":35.76,"Luke>Matthew":20.95}},"20-14":{"dir":"examples/Window20/Threshold14","sections":[138,60,49,29],"heads":{"Luke>Mark":10.78,"Mark>Matthew":49.12,"Matthew>Luke":17.7,"Mark>Luke":19.55,"Matthew>Mark":29.94,"Luke>Matthew":17.04}},"20-15":{"dir":"examples/Window20/Threshold15","sections":[117,55,40,22],"heads":{"Luke>Mark":7.33,"Mark>Matthew":37.55,"Matthew>Luke":13.79,"Mark>Luke":13.14,"Matthew>Mark":22.79,"Luke>Matthew":13.54}},"20-16":{"dir":"examples/Window20/Threshold16","sections":[95,42,34,19],"heads":{"Luke>Mark":5.43,"Mark>Matthew":25.89,"Matthew>Luke":11.14,"Mark>Luke":9.85,"Matthew>Mark":15.53,"Luke>Matthew":10.75}},"20-17":{"dir":"examples/Window20/Threshold17","sections":[73,31,25,17],"heads":{"Luke>Mark":4.25,"Mark>Matthew":17.5,"Matthew>Luke":7.23,"Mark>Luke":7.74,"Matthew>Mark":10.79,"Luke>Matthew":6.89}},"20-18":{"dir":"examples/Window20/Threshold18","sections":[39,20,14,5],"heads":{"Luke>Mark":1.17,"Mark>Matthew":9.87,"Matthew>Luke":3.67,"Mark>Luke":2.15,"Matthew>Mark":6.02,"Luke>Matthew":3.39}},"20-19":{"dir":"examples/Window20/Threshold19","sections":[19,10,6,3],"heads":{"Luke>Mark":0.61,"Mark>Matthew":4.38,"Matthew>Luke":1.44,"Mark>Luke":1.09,"Matthew>Mark":2.71,"Luke>Matthew":1.33}},"20-20":{"dir":"examples/Window20/Threshold20","sections":[3,1,1,1],"heads":{"Luke>Mark":0.17,"Mark>Matthew":0.5,"Matthew>Luke":0.2,"Mark>Luke":0.3,"Matthew>Mark":0.3,"Luke>Matthew":0.19}}};
 const CHARTS = [
- ["01_directional_overlap","Directional Overlap","Percentage of each book found in each other book"],
- ["02_book_composition","Book Composition","Shared versus unique material in each Gospel"],
- ["03_coverage_by_chapter","Coverage by Chapter","Overlap coverage across individual chapters"],
- ["04_overlap_barcode","Overlap Barcode","Position of shared text along each book"],
- ["05_section_lengths","Section Lengths","Distribution of shared section lengths"],
- ["06_order_agreement","Order Agreement","Whether shared sections appear in the same sequence"],
- ["07_verbal_agreement","Verbal Agreement","Degree of wording agreement within sections"],
- ["08_synoptic_relationships","Synoptic Relationships","Triple, double, and single tradition"],
- ["09_chord_diagram","Chord Diagram","Connections between books as chords"],
- ["10_alignment_ribbons","Alignment Ribbons","Parallel alignment of shared sections"],
- ["11_chapter_heatmaps","Chapter Heatmaps","Chapter-by-chapter overlap intensity"],
- ["12_verse_grid","Verse Grid","Verse-level overlap map"],
- ["13_donuts","Donut Charts","Proportional composition by book"],
- ["14_waffle","Waffle Charts","Unit-square proportional view"],
- ["15_treemap","Treemap","Hierarchical area view of overlap"],
- ["16_asymmetry_dumbbell","Asymmetry Dumbbell","Directional asymmetry between book pairs"],
- ["17_overlap_along_book_area","Overlap Along Book","Cumulative overlap area along each book"],
- ["18_cumulative_and_ecdf","Cumulative and ECDF","Cumulative curves and empirical distribution"],
- ["19_radar","Radar","Multi-metric profile per book"],
- ["20_length_vs_similarity","Length vs Similarity","Section length against similarity"],
- ["21_similarity_distribution","Similarity Distribution","Distribution of similarity scores"],
- ["22_longest_sections","Longest Sections","The longest shared passages"]
+ ["01_directional_overlap","Directional Overlap"],
+ ["02_book_composition","Book Composition"],
+ ["03_coverage_by_chapter","Coverage by Chapter"],
+ ["04_overlap_barcode","Overlap Barcode"],
+ ["05_section_lengths","Section Lengths"],
+ ["06_order_agreement","Order Agreement"],
+ ["07_verbal_agreement","Verbal Agreement"],
+ ["08_synoptic_relationships","Synoptic Relationships"],
+ ["09_chord_diagram","Chord Diagram"],
+ ["10_alignment_ribbons","Alignment Ribbons"],
+ ["11_chapter_heatmaps","Chapter Heatmaps"],
+ ["12_verse_grid","Verse Grid"],
+ ["13_donuts","Donut Charts"],
+ ["14_waffle","Waffle Charts"],
+ ["15_treemap","Treemap"],
+ ["16_asymmetry_dumbbell","Asymmetry Dumbbell"],
+ ["17_overlap_along_book_area","Overlap Along Book"],
+ ["18_cumulative_and_ecdf","Cumulative and ECDF"],
+ ["19_radar","Radar"],
+ ["20_length_vs_similarity","Length vs Similarity"],
+ ["21_similarity_distribution","Similarity Distribution"],
+ ["22_longest_sections","Longest Sections"]
 ];
-const WINDOWS=[...new Set(Object.keys(META).map(k=>+k.split("-")[0]))].sort((a,b)=>a-b);
-const thrFor=w=>Object.keys(META).filter(k=>+k.split("-")[0]===w).map(k=>+k.split("-")[1]).sort((a,b)=>a-b);
 
-const $=id=>document.getElementById(id);
-const sel=$("chart"),win=$("win"),thr=$("thr"),img=$("img"),box=$("box");
-let st={chart:0,w:WINDOWS[1]||WINDOWS[0],t:null};
+const MANIFEST = (typeof window.SYNOPTIC_MANIFEST === "object" && window.SYNOPTIC_MANIFEST) ? window.SYNOPTIC_MANIFEST : null;
+const pad = n => String(n).padStart(2, "0");
+const key = (w,t,f,k,o) => `${w}-${t}-${f}-${k}-${o}`;
+const dirFor = (w,t,f,k,o) =>
+  `examples/Window${pad(w)}/Threshold${pad(t)}/${f==="lemma"?"Lemma":"Norm"}_${k?"ContentOnly":"AllWords"}_${o?"OrderOn":"OrderOff"}`;
 
-CHARTS.forEach((c,i)=>{const o=document.createElement("option");o.value=i;o.textContent=String(i+1).padStart(2,"0")+"  "+c[1];sel.appendChild(o)});
-win.max=WINDOWS.length-1;
-$("winTicks").innerHTML=WINDOWS.map(w=>`<span>${w}</span>`).join("");
-
-function setThrRange(){
-  const ts=thrFor(st.w);
-  if(st.t===null||!ts.includes(st.t)) st.t=ts.reduce((a,b)=>Math.abs(b-(st.t??ts[0]))<Math.abs(a-(st.t??ts[0]))?b:a);
-  thr.max=ts.length-1; thr.value=ts.indexOf(st.t);
-  $("thrMin").textContent=ts[0]; $("thrMax").textContent=ts[ts.length-1];
+// Build index: idx["f|k|o"][w] = sorted thresholds. Uses the manifest when
+// present; otherwise falls back to the full theoretical grid.
+const idx = {};
+const addCombo = (w,t,f,k,o) => {
+  const g = `${f}|${k}|${o}`;
+  ((idx[g] ||= {})[w] ||= []).push(t);
+};
+if (MANIFEST) {
+  Object.keys(MANIFEST.combos).forEach(id => {
+    const [w,t,f,k,o] = id.split("-");
+    addCombo(+w, +t, f, +k, +o);
+  });
+} else {
+  [5,10,15,20].forEach(w => {
+    for (let t = Math.ceil(w/3); t <= w; t++)
+      ["lemma","norm"].forEach(f => [1,0].forEach(k => [0,1].forEach(o => addCombo(w,t,f,k,o))));
+  });
 }
-const url=()=>`${META[st.w+"-"+st.t].dir}/media/${CHARTS[st.chart][0]}.png`;
-const cache={};
-function preload(u){if(!cache[u]){const i=new Image();i.src=u;cache[u]=i}}
+Object.values(idx).forEach(byW => Object.values(byW).forEach(a => a.sort((x,y) => x-y)));
 
-function render(){
-  const m=META[st.w+"-"+st.t], c=CHARTS[st.chart], u=url();
-  sel.value=st.chart; win.value=WINDOWS.indexOf(st.w);
-  $("winVal").textContent=st.w; $("thrVal").textContent=st.t;
-  
-  $("title").textContent=c[1];
-  $("cap").textContent=`Window ${st.w}, threshold ${st.t}`;
-  $("open").href=u; $("dl").href=u;
-  img.alt=`${c[1]}, window ${st.w}, threshold ${st.t}`;
-  box.classList.add("busy"); img.classList.add("loading"); $("err").style.display="none";
-  img.onload=()=>{box.classList.remove("busy");img.classList.remove("loading");img.style.display="block"};
-  img.onerror=()=>{box.classList.remove("busy");img.style.display="none";$("err").style.display="block"};
-  img.src=u;
-  // stats
-  const s=m.sections;
-  if(s){$("secTotal").textContent=s[0].toLocaleString();$("s1").textContent=s[1].toLocaleString();$("s2").textContent=s[2].toLocaleString();$("s3").textContent=s[3].toLocaleString()}
-  const order=[["Mark>Matthew","Mark in Matthew"],["Matthew>Mark","Matthew in Mark"],["Matthew>Luke","Matthew in Luke"],["Luke>Matthew","Luke in Matthew"],["Mark>Luke","Mark in Luke"],["Luke>Mark","Luke in Mark"]];
-  $("heads").innerHTML="<table>"+order.map(([k,l])=>{const v=m.heads[k]??0;return `<tr><td>${l}<div class="bar"><i style="width:${Math.min(v,100)}%"></i></div></td><td>${v.toFixed(1)}%</td></tr>`}).join("")+"</table>";
-  // preload neighbours
-  const ts=thrFor(st.w), ti=ts.indexOf(st.t);
-  [ti-1,ti+1].forEach(j=>{if(ts[j]!==undefined)preload(`${META[st.w+"-"+ts[j]].dir}/media/${c[0]}.png`)});
-  [st.chart-1,st.chart+1].forEach(j=>{if(CHARTS[j])preload(`${m.dir}/media/${CHARTS[j][0]}.png`)});
-  history.replaceState(null,"",`#c=${st.chart+1}&w=${st.w}&t=${st.t}`);
+const $ = id => document.getElementById(id);
+const sel=$("chart"), win=$("win"), thr=$("thr"), img=$("img"), box=$("box"), msg=$("msg");
+const st = {chart:0, w:10, t:5, f:"lemma", k:1, o:0};
+
+const group = () => idx[`${st.f}|${st.k}|${st.o}`] || {};
+const windowsAvail = () => Object.keys(group()).map(Number).sort((a,b)=>a-b);
+const thrAvail = w => group()[w] || [];
+const nearest = (arr, v) => arr.reduce((a,b) => Math.abs(b-v) < Math.abs(a-v) ? b : a);
+
+function resolve(preferredT){
+  const ws = windowsAvail();
+  if (!ws.length) return false;
+  if (!ws.includes(st.w)) st.w = nearest(ws, st.w);
+  const ts = thrAvail(st.w);
+  const want = preferredT ?? st.t;
+  if (!ts.includes(want)) st.t = nearest(ts, want); else st.t = want;
+  return true;
 }
 
-sel.onchange=()=>{st.chart=+sel.value;render()};
-win.oninput=()=>{st.w=WINDOWS[+win.value];setThrRange();render()};
-thr.oninput=()=>{st.t=thrFor(st.w)[+thr.value];render()};
-$("prev").onclick=()=>{st.chart=(st.chart+CHARTS.length-1)%CHARTS.length;render()};
-$("next").onclick=()=>{st.chart=(st.chart+1)%CHARTS.length;render()};
-img.onclick=()=>{$("big").src=img.src;$("dlg").showModal()};
-$("dlg").onclick=()=>$("dlg").close();
-document.addEventListener("keydown",e=>{
-  if(["INPUT","SELECT"].includes(document.activeElement.tagName)&&e.key.startsWith("Arrow")&&document.activeElement!==document.body&&document.activeElement.tagName==="INPUT")return;
-  if(e.key==="ArrowUp"){$("prev").click();e.preventDefault()}
-  if(e.key==="ArrowDown"){$("next").click();e.preventDefault()}
+CHARTS.forEach((c,i) => {
+  const o = document.createElement("option");
+  o.value = i; o.textContent = String(i+1).padStart(2,"0") + "  " + c[1];
+  sel.appendChild(o);
 });
 
-// initial state from hash
-const h=Object.fromEntries(location.hash.slice(1).split("&").map(p=>p.split("=")));
-if(h.c&&CHARTS[h.c-1])st.chart=h.c-1;
-if(h.w&&WINDOWS.includes(+h.w))st.w=+h.w;
-if(h.t)st.t=+h.t;
-setThrRange(); render();
+const entry = () => MANIFEST ? MANIFEST.combos[key(st.w,st.t,st.f,st.k,st.o)] : null;
+const dirOf = (w,t) => {
+  const e = MANIFEST && MANIFEST.combos[key(w,t,st.f,st.k,st.o)];
+  return e ? e.dir : dirFor(w,t,st.f,st.k,st.o);
+};
+const imgUrl = (w,t,ci) => `${dirOf(w,t)}/media/${CHARTS[ci][0]}.png`;
+const cache = {};
+const preload = u => { if (!cache[u]) { const i = new Image(); i.src = u; cache[u] = i; } };
+
+function showMessage(text){
+  img.style.display = "none"; msg.textContent = text; msg.classList.add("show");
+  box.classList.remove("busy");
+}
+
+function methodText(){
+  const form = st.f === "lemma" ? "lemmas (dictionary forms)" : "normalized word forms";
+  const order = st.o
+    ? "The shared words must also occur in the same relative order, though not necessarily contiguously (longest common subsequence)."
+    : "Shared words are counted as a multiset intersection, so word order is ignored.";
+  const words = st.k
+    ? "Articles, conjunctions, prepositions, particles, and pronouns are excluded, and each window is the stated number of non-excluded words."
+    : "All words are included, and each window is the stated number of consecutive words.";
+  return `Two windows from different books match when they share at least the <b>threshold</b> number of ${form}. ${order} ${words}`;
+}
+
+function render(){
+  const ok = resolve();
+  const ws = windowsAvail(), ts = ok ? thrAvail(st.w) : [];
+  sel.value = st.chart;
+  document.querySelectorAll(".seg").forEach(s => {
+    s.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(st[s.dataset.key]) === b.dataset.v));
+  });
+  $("hintO").textContent = st.o ? "Shared words must be in the same order" : "Shared words counted regardless of order";
+  $("hintF").textContent = st.f === "lemma" ? "Dictionary form of each word" : "Normalized spelling of each word";
+  $("hintK").textContent = st.k ? "Articles, conjunctions, prepositions, particles, pronouns excluded" : "Every word counts toward a match";
+  $("method").innerHTML = methodText();
+  $("winHint").textContent = st.k ? "Non-excluded words per block" : "Words per block";
+
+  win.disabled = thr.disabled = !ok;
+  if (ok) {
+    win.max = ws.length - 1; win.value = ws.indexOf(st.w);
+    thr.max = ts.length - 1; thr.value = ts.indexOf(st.t);
+    $("winTicks").innerHTML = ws.map(w => `<span>${w}</span>`).join("");
+    $("winVal").textContent = st.w; $("thrVal").textContent = st.t;
+    $("thrMin").textContent = ts[0]; $("thrMax").textContent = ts[ts.length-1];
+  } else {
+    $("winTicks").innerHTML = ""; $("winVal").textContent = "\u2013"; $("thrVal").textContent = "\u2013";
+    $("thrMin").textContent = ""; $("thrMax").textContent = "";
+  }
+
+  const c = CHARTS[st.chart];
+  $("title").textContent = c[1];
+  msg.classList.remove("show");
+
+  if (!ok) {
+    $("cap").textContent = "";
+    $("open").removeAttribute("href"); $("dl").removeAttribute("href");
+    showMessage("No results were generated for this combination of settings. Change a toggle, or re-run generate_examples.ps1 with a longer time limit.");
+    setStats(null);
+    return;
+  }
+
+  const e = entry();
+  const label = `Window ${st.w}, threshold ${st.t} \u00b7 ${st.f === "lemma" ? "Lemma" : "Normalized"} \u00b7 ${st.k ? "Content words only" : "All words"} \u00b7 Word order ${st.o ? "respected" : "ignored"}`;
+  $("cap").textContent = label;
+  history.replaceState(null, "", `#c=${st.chart+1}&w=${st.w}&t=${st.t}&f=${st.f}&k=${st.k}&o=${st.o}`);
+  setStats(e);
+
+  if (e && e.empty) {
+    $("open").removeAttribute("href"); $("dl").removeAttribute("href");
+    showMessage("No shared sections were found at these settings, so there are no charts. Lower the threshold or relax a setting.");
+    return;
+  }
+
+  const u = imgUrl(st.w, st.t, st.chart);
+  $("open").href = u; $("dl").href = u;
+  const token = ++render.token;
+  box.classList.add("busy"); img.classList.add("loading");
+  const probe = new Image();
+  probe.onload = () => {
+    if (token !== render.token) return;
+    img.src = u; img.alt = `${c[1]}, ${label}`; img.style.display = "block";
+    img.classList.remove("loading"); box.classList.remove("busy");
+  };
+  probe.onerror = () => {
+    if (token !== render.token) return;
+    showMessage("Image not found. Place this file at the repository root so that the examples/ folder is beside it, and run generate_examples.ps1 if the folder is empty.");
+  };
+  probe.src = u;
+
+  // preload neighbours
+  const ti = ts.indexOf(st.t);
+  [ti-1, ti+1].forEach(j => { if (ts[j] !== undefined) preload(imgUrl(st.w, ts[j], st.chart)); });
+  [st.chart-1, st.chart+1].forEach(j => { if (CHARTS[j]) preload(imgUrl(st.w, st.t, j)); });
+}
+render.token = 0;
+
+function setStats(e){
+  const dash = "\u2013";
+  if (e && e.sections) {
+    const s = e.sections.map(Number);
+    $("secTotal").textContent = s[0].toLocaleString();
+    $("s1").textContent = s[1].toLocaleString(); $("s2").textContent = s[2].toLocaleString(); $("s3").textContent = s[3].toLocaleString();
+  } else {
+    const z = e && e.empty ? "0" : dash;
+    ["secTotal","s1","s2","s3"].forEach(id => $(id).textContent = z);
+  }
+  const order = [["Mark>Matthew","Mark in Matthew"],["Matthew>Mark","Matthew in Mark"],["Matthew>Luke","Matthew in Luke"],["Luke>Matthew","Luke in Matthew"],["Mark>Luke","Mark in Luke"],["Luke>Mark","Luke in Mark"]];
+  if (e && e.heads) {
+    $("heads").innerHTML = "<table>" + order.map(([k,l]) => {
+      const v = Number(e.heads[k] ?? 0);
+      return `<tr><td>${l}<div class="bar"><i style="width:${Math.min(v,100)}%"></i></div></td><td>${v.toFixed(1)}%</td></tr>`;
+    }).join("") + "</table>";
+  } else {
+    $("heads").innerHTML = `<div class="sub">${e && e.empty ? "No sections found." : "Statistics unavailable (examples/manifest.js not loaded)."}</div>`;
+  }
+}
+
+// events
+sel.onchange = () => { st.chart = +sel.value; render(); };
+win.oninput = () => { st.w = windowsAvail()[+win.value]; render(); };
+thr.oninput = () => { st.t = thrAvail(st.w)[+thr.value]; render(); };
+document.querySelectorAll(".seg button").forEach(b => {
+  b.onclick = () => {
+    const k = b.parentElement.dataset.key;
+    const prevT = st.t;
+    st[k] = k === "f" ? b.dataset.v : +b.dataset.v;
+    resolve(prevT);
+    render();
+  };
+});
+$("prev").onclick = () => { st.chart = (st.chart + CHARTS.length - 1) % CHARTS.length; render(); };
+$("next").onclick = () => { st.chart = (st.chart + 1) % CHARTS.length; render(); };
+img.onclick = () => { $("big").src = img.src; $("dlg").showModal(); };
+$("dlg").onclick = () => $("dlg").close();
+document.addEventListener("keydown", e => {
+  const tag = document.activeElement && document.activeElement.tagName;
+  if (tag === "INPUT" || tag === "SELECT") return;
+  if (e.key === "ArrowUp") { $("prev").click(); e.preventDefault(); }
+  if (e.key === "ArrowDown") { $("next").click(); e.preventDefault(); }
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+    const ts = thrAvail(st.w), i = ts.indexOf(st.t) + (e.key === "ArrowRight" ? 1 : -1);
+    if (ts[i] !== undefined) { st.t = ts[i]; render(); }
+    e.preventDefault();
+  }
+});
+
+// availability note
+(function(){
+  if (MANIFEST) {
+    const n = Object.keys(MANIFEST.combos).length;
+    $("avail").textContent = `${n} of ${MANIFEST.expected} setting combinations available. Missing combinations exceeded the time or memory limit during generation.`;
+  } else {
+    $("avail").textContent = "examples/manifest.js was not found, so all combinations are assumed to exist and statistics are hidden. Run generate_examples.ps1 to create it.";
+  }
+})();
+
+// initial state from hash, then defaults
+const h = Object.fromEntries(location.hash.slice(1).split("&").filter(Boolean).map(p => p.split("=")));
+if (h.c && CHARTS[h.c-1]) st.chart = h.c - 1;
+if (h.f === "lemma" || h.f === "norm") st.f = h.f;
+if (h.k === "0" || h.k === "1") st.k = +h.k;
+if (h.o === "0" || h.o === "1") st.o = +h.o;
+if (h.w) st.w = +h.w;
+if (h.t) st.t = +h.t; else st.t = Math.round(st.w / 2);
+resolve(st.t);
+render();
 </script>
 </body>
 </html>
