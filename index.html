@@ -82,7 +82,73 @@ dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:96vh}
 dialog::backdrop{background:rgba(10,14,20,.8)}
 dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;display:block}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-@media(max-width:980px){.controls{grid-template-columns:1fr;gap:20px}.ctl.toggles{grid-template-columns:1fr;gap:20px}.layout{grid-template-columns:1fr}}
+@media(max-width:980px){.controls{grid-template-columns:1fr;gap:20px}.ctl.toggles{grid-template-columns:1fr;gap:20px}.layout{grid-template-columns:minmax(0,1fr)}}
+
+[hidden]{display:none!important}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:-6px -6px 16px;padding:0 6px}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;padding:10px 16px;color:var(--muted);font-weight:600;margin-bottom:-1px}
+.tabs button:hover{color:var(--accent);background:transparent}
+.tabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
+.pane-msg{padding:34px 20px;text-align:center;color:var(--muted);font-size:14px;max-width:620px;margin:0 auto}
+.pane-msg.err{color:var(--warn)}
+.pane-msg button{margin-top:12px}
+.pane-msg code{background:var(--accent-soft);padding:1px 6px;border-radius:4px;font-size:13px}
+.progress{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:12px auto 0;max-width:260px}
+.progress i{display:block;height:100%;width:40%;background:var(--accent);animation:ind 1.1s ease-in-out infinite}
+@keyframes ind{0%{margin-left:-40%}100%{margin-left:100%}}
+@media (prefers-reduced-motion:reduce){.progress i{animation:none;width:100%}}
+.conn-tools{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center;margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:6px 11px;font-size:13px;border-radius:999px}
+.chips button[aria-pressed=true]{background:var(--accent);color:var(--surface);border-color:var(--accent);font-weight:600}
+.chips button span{opacity:.75;margin-left:4px;font-variant-numeric:tabular-nums}
+.conn-tools input[type=search]{flex:1 1 200px;min-width:160px;padding:8px 11px;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:7px}
+.conn-tools select{width:auto;padding:8px 32px 8px 11px;font-size:14px}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap}
+.conn-count{font-size:13px;color:var(--muted);margin:0 0 8px}
+.conn-count a{color:var(--accent)}
+.conn{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:14px;align-items:start}
+.vlist{height:600px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg);position:relative;outline-offset:2px}
+.vspacer{position:relative;width:100%}
+.vrow{position:absolute;left:0;right:0;height:56px;padding:7px 12px;border-bottom:1px solid var(--line);cursor:pointer;overflow:hidden}
+.vrow:hover{background:var(--accent-soft)}
+.vrow[aria-selected=true]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.r1{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.r1 .len{margin-left:auto;font-variant-numeric:tabular-nums}
+.r2{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.r2 i{font-style:normal;color:var(--muted);margin:0 4px}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.02em;background:var(--accent-soft);color:var(--accent);border:1px solid var(--line)}
+.detail{border:1px solid var(--line);border-radius:8px;padding:16px 18px;height:600px;overflow:auto;background:var(--surface)}
+.detail h3{font-family:Georgia,serif;font-size:18px;margin:0 0 12px;font-weight:600}
+.detail .empty{color:var(--muted);font-size:14px}
+.pc{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:12px;background:var(--bg)}
+.pc-h{font-weight:600;font-size:15px}
+.pc-m{font-size:12px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;margin-top:6px;font-size:11px;padding:1px 8px;border-radius:999px;color:var(--gold);border:1px solid var(--gold)}
+.greek{font-family:"Gentium Plus","Gentium Book Plus","Cardo","SBL Greek","Palatino Linotype","Times New Roman",serif;font-size:18px;line-height:1.75;margin:10px 0 0}
+.sh{background:color-mix(in srgb,var(--gold) 30%,transparent);border-radius:2px}
+.note{font-size:12px;color:var(--muted);margin:2px 0 14px}
+.rel h4{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-weight:600}
+.rel-i{display:flex;gap:8px;align-items:center;width:100%;text-align:left;margin-bottom:5px;padding:7px 10px;font-size:13px}
+.rel-i .ov{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap}
+.rel-i .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px}
+.stat-meta{font-size:13px;color:var(--muted);max-width:640px}
+.stat-meta b{color:var(--ink)}
+.stat-act{display:flex;gap:6px;align-items:center;font-size:13px}
+.stat-act a{color:var(--accent)}
+.statnav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.statnav button{padding:5px 10px;font-size:12.5px;border-radius:999px}
+.statscroll{max-height:640px;overflow:auto;position:relative;padding-right:4px}
+.statsec{margin-bottom:20px}
+.statsec h3{margin:0 0 8px;font-size:13px;letter-spacing:.06em;color:var(--accent);font-weight:600}
+pre.rep{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;overflow-x:auto;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0;white-space:pre;tab-size:4}
+.stage{min-width:0}
+.tabs{overflow-x:auto}
+.tabs button{white-space:nowrap}
+.stat-act{flex-wrap:wrap}
+@media(max-width:760px){.conn{grid-template-columns:minmax(0,1fr)}.vlist,.detail{height:440px}}
+@media(max-width:520px){.tabs button{padding:10px 11px;font-size:13px}.stage{padding:14px 12px 12px}}
 </style>
 <script src="examples/manifest.js"></script>
 </head>
@@ -90,7 +156,7 @@ dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;disp
 <header><div class="wrap hero">
   <div class="eyebrow">Computational Textual Criticism</div>
   <h1>The Synoptic Problem: Lexical Overlap Explorer</h1>
-  <p class="lede">Shared passages among Matthew, Mark, and Luke, detected in the SBLGNT/MorphGNT text by sliding windows. Vary the window size and match threshold, and switch word order, comparison form, and word class, to see how each analysis responds.</p>
+  <p class="lede">Shared passages among Matthew, Mark, and Luke, detected in the SBLGNT/MorphGNT text by sliding windows. Vary the window size and match threshold, and switch word order, comparison form, and word class, to see how each analysis responds. Each configuration also offers its full list of connections and its statistical report.</p>
 </div></header>
 
 <main class="wrap">
@@ -98,7 +164,7 @@ dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;disp
     <div class="ctl">
       <label for="chart">Chart</label>
       <select id="chart"></select>
-      <div class="hint">Select one of the 22 chart types</div>
+      <div class="hint" id="chartHint">Select one of the 22 chart types</div>
     </div>
     <div class="ctl">
       <label for="win">Window size <span class="val" id="winVal"></span></label>
@@ -142,6 +208,13 @@ dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;disp
 
   <div class="layout">
     <section class="panel stage">
+      <div class="tabs" role="tablist" aria-label="View">
+        <button type="button" role="tab" id="tab-charts" data-v="charts" aria-controls="vCharts">Charts</button>
+        <button type="button" role="tab" id="tab-conn" data-v="conn" aria-controls="vConn">Connections</button>
+        <button type="button" role="tab" id="tab-stats" data-v="stats" aria-controls="vStats">Statistical report</button>
+      </div>
+
+      <div id="vCharts" role="tabpanel" aria-labelledby="tab-charts">
       <div class="stage-head">
         <h2 class="stage-title" id="title"></h2>
         <div class="nav">
@@ -157,6 +230,43 @@ dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;disp
       <div class="caption">
         <span id="cap"></span>
         <span><a id="open" target="_blank" rel="noopener">Open full size</a> &middot; <a id="dl" download>Download</a></span>
+      </div>
+      </div>
+
+      <div id="vConn" role="tabpanel" aria-labelledby="tab-conn" hidden>
+        <div class="pane-msg" id="connMsg"></div>
+        <div id="connBody" hidden>
+          <div class="conn-tools">
+            <div class="chips" id="pairChips" role="group" aria-label="Book pair"></div>
+            <input type="search" id="connQ" placeholder="Mark 4:3 or Greek text" aria-label="Search connections" autocomplete="off">
+            <select id="connSort" aria-label="Sort connections">
+              <option value="src">Source order</option>
+              <option value="long">Longest first</option>
+              <option value="short">Shortest first</option>
+            </select>
+            <label class="chk"><input type="checkbox" id="connTriple"> Also matches third book</label>
+          </div>
+          <div class="conn-count"><span id="connCount"></span> &middot; <a id="connRaw" target="_blank" rel="noopener">Open raw file</a></div>
+          <div class="conn">
+            <div class="vlist" id="vlist" tabindex="0" role="listbox" aria-label="Connections"><div class="vspacer" id="vspacer"></div></div>
+            <div class="detail" id="detail" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="vStats" role="tabpanel" aria-labelledby="tab-stats" hidden>
+        <div class="pane-msg" id="statMsg"></div>
+        <div id="statBody" hidden>
+          <div class="stat-head">
+            <div class="stat-meta" id="statMeta"></div>
+            <div class="stat-act">
+              <button type="button" id="statCopy">Copy report</button>
+              <a id="statRaw" target="_blank" rel="noopener">Open raw</a> &middot; <a id="statDl" download>Download</a>
+            </div>
+          </div>
+          <div class="statnav" id="statNav"></div>
+          <div class="statscroll" id="statScroll"></div>
+        </div>
       </div>
     </section>
 
@@ -189,6 +299,7 @@ dialog img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px;disp
   <p>Source: <a href="https://github.com/HyrumHendrickson/SynopticProblem" target="_blank" rel="noopener">HyrumHendrickson/SynopticProblem</a>. Greek text: SBLGNT, ed. Michael W. Holmes (CC BY 4.0). Morphological data: MorphGNT (CC BY-SA 4.0).</p>
 </div></footer>
 
+<input type="file" id="folder" webkitdirectory multiple hidden>
 <dialog id="dlg"><img id="big" alt=""></dialog>
 
 <script>
@@ -216,6 +327,108 @@ const CHARTS = [
  ["21_similarity_distribution","Similarity Distribution"],
  ["22_longest_sections","Longest Sections"]
 ];
+
+/*PARSE-START*/
+const PAIRS = [["Matthew","Mark","Mt\u2013Mk"],["Matthew","Luke","Mt\u2013Lk"],["Mark","Luke","Mk\u2013Lk"]];
+const PCODE = ["MtMk","MtLk","MkLk"];
+const HDR = /^(Matthew|Mark|Luke) (\d+):(\d+)(?:-(\d+):(\d+))? \((\d+) words(?:, (\d+) non-excluded)?\) @(\d+)-(\d+)(?:\s+\[also shares text with (Matthew|Mark|Luke)\])?:\s*$/;
+const SECRE = /^=== (Matthew|Mark|Luke) vs (Matthew|Mark|Luke), section (\d+) ===\s*$/;
+
+function parseOverlaps(text){
+  const lines = text.split("\n");
+  const secs = [], byId = new Map(), byBook = {Matthew:[], Mark:[], Luke:[]}, counts = [0,0,0];
+  let cur = null, pend = null;
+  for (let i = 0; i < lines.length; i++){
+    let l = lines[i];
+    if (l.charCodeAt(l.length-1) === 13) l = l.slice(0,-1);
+    if (!l) continue;
+    const c0 = l.charCodeAt(0);
+    if (c0 === 61) {                      // "=== ... ==="
+      const m = SECRE.exec(l);
+      if (m) {
+        const p = PAIRS.findIndex(x => x[0] === m[1] && x[1] === m[2]);
+        if (p < 0) { cur = null; continue; }
+        cur = {id: PCODE[p] + "-" + m[3], p, n: +m[3], a: null, b: null, len: 0, norm: null};
+        secs.push(cur); byId.set(cur.id, cur); counts[p]++; pend = null;
+      }
+      continue;
+    }
+    if (c0 === 32) { if (pend) { pend.text = l.trim(); pend = null; } continue; }
+    if (c0 === 35 || !cur) continue;      // "#" banners
+    const m = HDR.exec(l);
+    if (!m) continue;
+    const c1 = +m[2], v1 = +m[3];
+    const ps = {book: m[1], ref: l.slice(0, l.indexOf(" (")), c1, v1,
+                c2: m[4] ? +m[4] : c1, v2: m[5] ? +m[5] : v1,
+                words: +m[6], content: m[7] ? +m[7] : null, s: +m[8], e: +m[9], also: m[10] || null, text: ""};
+    if (!cur.a) cur.a = ps; else if (!cur.b) cur.b = ps;
+    pend = ps;
+  }
+  const good = [];
+  for (const s of secs) {
+    if (!s.a || !s.b) { byId.delete(s.id); counts[s.p]--; continue; }
+    s.len = Math.max(s.a.words, s.b.words);
+    byBook[s.a.book].push({s: s.a.s, e: s.a.e, sec: s, side: "a"});
+    byBook[s.b.book].push({s: s.b.s, e: s.b.e, sec: s, side: "b"});
+    good.push(s);
+  }
+  return {secs: good, byId, byBook, counts, settings: (lines[0] || "").trim()};
+}
+
+function relatedFor(data, sec, side){
+  const p = sec[side], out = [];
+  for (const en of data.byBook[p.book]) {
+    if (en.sec === sec || en.s > p.e || en.e < p.s) continue;
+    const other = en.side === "a" ? "b" : "a";
+    out.push({sec: en.sec, own: en.sec[en.side], partner: en.sec[other],
+              ov: Math.min(en.e, p.e) - Math.max(en.s, p.s) + 1});
+  }
+  out.sort((x, y) => y.ov - x.ov || x.sec.p - y.sec.p || x.sec.n - y.sec.n);
+  return out;
+}
+
+const nw = w => w.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\u03c2/g, "\u03c3").replace(/[^\p{L}\p{N}]/gu, "");
+const nt = t => t.split(/\s+/).map(nw).filter(Boolean).join(" ");
+
+const BOOKMAP = {matthew:"Matthew", matt:"Matthew", mt:"Matthew", mark:"Mark", mk:"Mark", luke:"Luke", lk:"Luke"};
+const covers = (p, ch, vs) => vs == null
+  ? (p.c1 <= ch && ch <= p.c2)
+  : ((p.c1 < ch || (p.c1 === ch && p.v1 <= vs)) && (ch < p.c2 || (ch === p.c2 && vs <= p.v2)));
+
+function makeMatcher(q){
+  const m = /^(matthew|matt|mt|mark|mk|luke|lk)\.?\s*(\d+)(?:\s*:\s*(\d+))?$/i.exec(q.trim());
+  if (m) {
+    const book = BOOKMAP[m[1].toLowerCase()], ch = +m[2], vs = m[3] ? +m[3] : null;
+    return s => (s.a.book === book && covers(s.a, ch, vs)) || (s.b.book === book && covers(s.b, ch, vs));
+  }
+  const toks = nt(q).split(" ").filter(Boolean);
+  if (!toks.length) return () => true;
+  return s => {
+    if (s.norm === null) s.norm = nt(s.a.text + " " + s.b.text);
+    return toks.every(t => s.norm.includes(t));
+  };
+}
+
+function parseStats(raw){
+  const lines = raw.replace(/\r/g, "").split("\n");
+  const head = [], secs = [];
+  let cur = null;
+  const bar = x => /^={20,}$/.test(x || "");
+  for (let i = 0; i < lines.length; i++) {
+    if (bar(lines[i]) && /^\d+\.\s/.test(lines[i+1] || "") && bar(lines[i+2])) {
+      cur = {title: lines[i+1].trim(), body: []}; secs.push(cur); i += 2; continue;
+    }
+    (cur ? cur.body : head).push(lines[i]);
+  }
+  secs.forEach(s => { while (s.body.length && !s.body[s.body.length-1].trim()) s.body.pop(); s.text = s.body.join("\n"); });
+  // The first lines record the generator's local file path; omit it from display.
+  const keep = head.filter(l => !/^Overlap file:/.test(l));
+  const read = (head.find(l => /^Sections read:/.test(l)) || "").replace(/^Sections read:\s*/, "");
+  const settings = (head.find(l => /^Overlap settings:/.test(l)) || "").replace(/^Overlap settings:\s*/, "");
+  const full = keep.join("\n").trim() + "\n\n" + secs.map(s => "=".repeat(74) + "\n" + s.title + "\n" + "=".repeat(74) + "\n" + s.text).join("\n\n\n") + "\n";
+  return {secs, read, settings, text: full};
+}
+/*PARSE-END*/
 
 const MANIFEST = (typeof window.SYNOPTIC_MANIFEST === "object" && window.SYNOPTIC_MANIFEST) ? window.SYNOPTIC_MANIFEST : null;
 const pad = n => String(n).padStart(2, "0");
@@ -245,7 +458,7 @@ Object.values(idx).forEach(byW => Object.values(byW).forEach(a => a.sort((x,y) =
 
 const $ = id => document.getElementById(id);
 const sel=$("chart"), win=$("win"), thr=$("thr"), img=$("img"), box=$("box"), msg=$("msg");
-const st = {chart:0, w:10, t:5, f:"lemma", k:1, o:0};
+const st = {chart:0, w:10, t:5, f:"lemma", k:1, o:0, view:"charts"};
 
 const group = () => idx[`${st.f}|${st.k}|${st.o}`] || {};
 const windowsAvail = () => Object.keys(group()).map(Number).sort((a,b)=>a-b);
@@ -293,6 +506,284 @@ function methodText(){
   return `Two windows from different books match when they share at least the <b>threshold</b> number of ${form}. ${order} ${words}`;
 }
 
+// ---------- shared helpers for the Connections and Report tabs ----------
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => Number(n).toLocaleString();
+const cfgLabel = () => `Window ${st.w}, threshold ${st.t} \u00b7 ${st.f === "lemma" ? "Lemma" : "Normalized"} \u00b7 ${st.k ? "Content words only" : "All words"} \u00b7 Word order ${st.o ? "respected" : "ignored"}`;
+const VIEWS = ["charts","conn","stats"];
+const PANEL = {charts:"vCharts", conn:"vConn", stats:"vStats"};
+const PANE = {conn:["connMsg","connBody"], stats:["statMsg","statBody"]};
+let initialSel = null;
+
+const STOP = new Set(("ὁ ἡ τό τοῦ τῆς τῷ τῇ τόν τήν οἱ αἱ τά τῶν τοῖς ταῖς τούς τάς " +
+  "καί δέ γάρ ἀλλά οὖν ἤ ὅτι ἵνα εἰ ἐάν ἄν μή οὐ οὐκ οὐχ οὐδέ μηδέ τε ὡς ὅταν ὅπως ἕως " +
+  "ἐν εἰς ἐκ ἐξ ἀπό ἀπ ἀφ πρός διά δι κατά κατ καθ μετά μετ μεθ ἐπί ἐπ ἐφ περί ὑπό ὑπ ὑφ παρά παρ ὑπέρ σύν ἀντί " +
+  "αὐτός αὐτοῦ αὐτῷ αὐτόν αὐτή αὐτῇ αὐτῆς αὐτήν αὐτό αὐτοί αὐταί αὐτά αὐτῶν αὐτοῖς αὐταῖς αὐτούς αὐτάς " +
+  "ἐγώ μου μοι με σύ σου σοι σε ἡμεῖς ἡμῶν ἡμῖν ἡμᾶς ὑμεῖς ὑμῶν ὑμῖν ὑμᾶς " +
+  "ὅς ἥ ὅ οὗ ᾧ ὅν ἥν οἵ αἵ ἅ ὧν οἷς οὕς τίς τί τις τι " +
+  "οὗτος αὕτη τοῦτο τούτου τούτῳ τοῦτον ταύτην ταῦτα τούτων τούτοις τούτους " +
+  "ἐκεῖνος ἐκείνη ἐκεῖνο ἐκείνου ἐκείνῳ ἐκεῖνον ἐκείνην ἐκείνων ἐκείνοις ἐκείνους").split(/\s+/).map(nw));
+
+function paneMsg(v, html, cls){ const [m,b] = PANE[v]; const el = $(m); el.className = "pane-msg" + (cls ? " " + cls : ""); el.innerHTML = html; el.hidden = false; $(b).hidden = true; }
+function paneLoading(v, text){ paneMsg(v, `${esc(text)}<div class="progress"><i></i></div>`); }
+function paneBody(v){ const [m,b] = PANE[v]; $(m).hidden = true; $(b).hidden = false; }
+
+// ---------- reading files: fetch when served over http(s); folder picker otherwise ----------
+const fileMap = {};
+let pickedEmpty = false;
+async function getText(dir, name, signal, onProg){
+  const rel = dir.replace(/^examples\//, "") + "/" + name;
+  if (fileMap[rel]) return await fileMap[rel].text();
+  let res;
+  try { res = await fetch(`${dir}/${name}`, {signal}); }
+  catch (err) { if (err.name === "AbortError") throw err; const e = new Error("blocked"); e.kind = "blocked"; throw e; }
+  if (res.status === 404) { const e = new Error("missing"); e.kind = "missing"; throw e; }
+  if (!res.ok) { const e = new Error("HTTP " + res.status); e.kind = "http"; throw e; }
+  if (res.body && onProg) {
+    const rd = res.body.getReader(), chunks = []; let n = 0;
+    for (;;) { const {done, value} = await rd.read(); if (done) break; chunks.push(value); n += value.length; onProg(n / 1048576); }
+    return await new Blob(chunks).text();
+  }
+  return await res.text();
+}
+function paneError(v, err, dir, name){
+  if (err.kind === "blocked") {
+    paneMsg(v, `This browser does not allow a page opened from disk to read other files, so the text files cannot be loaded automatically.<br><br>
+      Either serve the repository (for example, run <code>python -m http.server</code> in the repository root and open <code>http://localhost:8000/</code>), or select the <code>examples</code> folder once and the files will be read from it.${pickedEmpty ? "<br><br><b>No synoptic_overlaps.txt or synoptic_stats.txt files were found in the folder you selected.</b>" : ""}<br>
+      <button type="button" class="pick-folder">Select the examples folder</button>`);
+  } else if (err.kind === "missing") {
+    paneMsg(v, `<code>${esc(dir)}/${esc(name)}</code> was not found. It may have been removed to save space (the <code>-SkipOverlapText</code> option of generate.ps1) or not generated; see examples/generation_report.txt.`, "err");
+  } else {
+    paneMsg(v, `The file could not be loaded (${esc(err.message)}).`, "err");
+  }
+}
+$("folder").addEventListener("change", e => {
+  for (const k in fileMap) delete fileMap[k];
+  for (const f of e.target.files) {
+    const m = /(Window\d+\/Threshold\d+\/[^/]+\/synoptic_(?:overlaps|stats)\.txt)$/.exec(f.webkitRelativePath || "");
+    if (m) fileMap[m[1]] = f;
+  }
+  pickedEmpty = Object.keys(fileMap).length === 0;
+  e.target.value = "";
+  cs.dir = null; cs.data = null; cs.loading = null; ss.dir = null; ss.loading = null;
+  render();
+});
+document.addEventListener("click", e => { if (e.target.closest(".pick-folder")) $("folder").click(); });
+
+// ---------- Connections tab ----------
+const cs = {dir:null, data:null, view:[], sel:null, pair:-1, q:"", sort:"src", triple:false, token:0, abort:null, loading:null, timer:null};
+const connCache = new Map();
+const ROW = 56;
+
+function loadConn(e){
+  const dir = dirOf(st.w, st.t);
+  clearTimeout(cs.timer);
+  if (cs.loading && cs.loading !== dir) { cs.token++; if (cs.abort) cs.abort.abort(); cs.loading = null; }
+  if (e && e.empty) { paneMsg("conn", "No shared sections were found at these settings, so there are no connections to list. Lower the threshold or relax a setting."); return; }
+  if (cs.dir === dir && cs.data) { paneBody("conn"); paintList(); return; }
+  if (cs.loading === dir) return;
+  if (connCache.has(dir)) { setConnData(dir, connCache.get(dir)); return; }
+  paneLoading("conn", "Loading connections\u2026");
+  cs.timer = setTimeout(() => fetchConn(dir), 250);
+}
+async function fetchConn(dir){
+  const token = ++cs.token;
+  if (cs.abort) cs.abort.abort();
+  const ac = cs.abort = new AbortController();
+  cs.loading = dir;
+  try {
+    const text = await getText(dir, "synoptic_overlaps.txt", ac.signal, mb => paneLoading("conn", `Loading connections\u2026 ${mb.toFixed(1)} MB`));
+    if (token !== cs.token) return;
+    paneLoading("conn", "Parsing\u2026");
+    await new Promise(r => setTimeout(r, 20));
+    if (token !== cs.token) return;
+    const data = parseOverlaps(text);
+    connCache.set(dir, data);
+    while (connCache.size > 2) connCache.delete(connCache.keys().next().value);
+    cs.loading = null;
+    setConnData(dir, data);
+  } catch (err) {
+    if (token !== cs.token || err.name === "AbortError") return;
+    cs.loading = null; paneError("conn", err, dir, "synoptic_overlaps.txt");
+  }
+}
+function setConnData(dir, data){
+  cs.dir = dir; cs.data = data; cs.pair = -1; cs.q = ""; cs.triple = false; cs.sel = null;
+  $("connQ").value = ""; $("connTriple").checked = false;
+  $("connRaw").href = `${dir}/synoptic_overlaps.txt`;
+  if (!data.secs.length) { paneMsg("conn", "This file contains no connections."); return; }
+  paneBody("conn");
+  buildChips();
+  applyFilters();
+  const want = initialSel && data.byId.get(initialSel);
+  initialSel = null;
+  if (want) selectById(want.id);
+}
+function buildChips(){
+  const d = cs.data, total = d.secs.length;
+  const items = [[-1, "All", total]].concat(PAIRS.map((p, i) => [i, p[2], d.counts[i]]));
+  $("pairChips").innerHTML = items.map(([i, l, n]) => `<button type="button" data-p="${i}" aria-pressed="${cs.pair === i}">${l}<span>${fmt(n)}</span></button>`).join("");
+}
+function applyFilters(){
+  const d = cs.data; if (!d) return;
+  let arr = d.secs;
+  if (cs.pair >= 0) arr = arr.filter(s => s.p === cs.pair);
+  if (cs.triple) arr = arr.filter(s => s.a.also || s.b.also);
+  if (cs.q.trim()) arr = arr.filter(makeMatcher(cs.q));
+  if (cs.sort === "long") arr = arr.slice().sort((x, y) => y.len - x.len || x.p - y.p || x.n - y.n);
+  else if (cs.sort === "short") arr = arr.slice().sort((x, y) => x.len - y.len || x.p - y.p || x.n - y.n);
+  cs.view = arr;
+  $("pairChips").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.p === cs.pair)));
+  $("connCount").textContent = `${fmt(arr.length)} of ${fmt(d.secs.length)} connections` + (cs.q.trim() && /^(matthew|matt|mt|mark|mk|luke|lk)\.?\s*\d+/i.test(cs.q.trim()) ? " containing that reference" : "");
+  $("vlist").scrollTop = 0;
+  if (!arr.includes(cs.sel)) cs.sel = arr[0] || null;
+  paintList(); renderDetail(); updateHash();
+}
+function rowHtml(s, i){
+  const pr = PAIRS[s.p];
+  return `<div class="vrow" role="option" id="row${i}" data-i="${i}" aria-selected="${s === cs.sel}" style="top:${i * ROW}px">` +
+    `<div class="r1"><span class="pill">${pr[2]}</span><span>#${s.n}</span><span class="len">${s.len} words</span></div>` +
+    `<div class="r2">${esc(s.a.ref)}<i>\u2194</i>${esc(s.b.ref)}</div></div>`;
+}
+function paintList(){
+  const vl = $("vlist"), sp = $("vspacer"), v = cs.view;
+  if (!v.length) { sp.style.height = "auto"; sp.innerHTML = '<div class="pane-msg">No connections match.</div>'; return; }
+  sp.style.height = v.length * ROW + "px";
+  const H = vl.clientHeight || 600, top = vl.scrollTop;
+  const a = Math.max(0, Math.floor(top / ROW) - 5), b = Math.min(v.length, Math.ceil((top + H) / ROW) + 5);
+  let h = "";
+  for (let i = a; i < b; i++) h += rowHtml(v[i], i);
+  sp.innerHTML = h;
+}
+function ensureVisible(i){
+  const vl = $("vlist"), top = i * ROW;
+  if (top < vl.scrollTop) vl.scrollTop = top;
+  else if (top + ROW > vl.scrollTop + vl.clientHeight) vl.scrollTop = top + ROW - vl.clientHeight;
+}
+function selectSec(s, scroll){
+  cs.sel = s; 
+  if (scroll && s) ensureVisible(cs.view.indexOf(s));
+  paintList(); renderDetail(); updateHash();
+}
+function selectById(id){
+  const s = cs.data && cs.data.byId.get(id); if (!s) return;
+  if (!cs.view.includes(s)) {
+    cs.pair = -1; cs.q = ""; cs.triple = false; $("connQ").value = ""; $("connTriple").checked = false;
+    applyFilters();
+  }
+  selectSec(s, true);
+}
+function highlight(ta, tb){
+  const stop = st.k ? STOP : null;
+  const A = ta.split(/(\s+)/), B = tb.split(/(\s+)/);
+  const key = w => { const n = nw(w); return n && !(stop && stop.has(n)) ? n : ""; };
+  const ka = A.map(key), kb = B.map(key);
+  const sa = new Set(ka.filter(Boolean)), sb = new Set(kb.filter(Boolean));
+  const out = (T, K, other) => T.map((w, i) => K[i] && other.has(K[i]) ? `<span class="sh">${esc(w)}</span>` : esc(w)).join("");
+  return [out(A, ka, sb), out(B, kb, sa)];
+}
+function relHtml(s, side){
+  const p = s[side], list = relatedFor(cs.data, s, side);
+  if (!list.length) return `<div class="rel"><h4>This ${p.book} passage has no other connections</h4></div>`;
+  return `<div class="rel"><h4>Other connections of this ${p.book} passage (${fmt(list.length)})</h4>` +
+    list.slice(0, 8).map(r => `<button type="button" class="rel-i" data-id="${r.sec.id}"><span class="pill">${PAIRS[r.sec.p][2]} #${r.sec.n}</span><span class="t">${esc(r.own.ref)} \u2194 ${esc(r.partner.ref)}</span><span class="ov">overlap ${r.ov} w</span></button>`).join("") +
+    (list.length > 8 ? `<div class="note">and ${fmt(list.length - 8)} more</div>` : "") + `</div>`;
+}
+function renderDetail(){
+  const d = $("detail"), s = cs.sel;
+  if (!s) { d.innerHTML = '<div class="empty">No connection selected.</div>'; return; }
+  const [ha, hb] = highlight(s.a.text, s.b.text);
+  const card = (p, h) => `<section class="pc"><div class="pc-h">${esc(p.ref)}</div>` +
+    `<div class="pc-m">${p.words} words${p.content != null ? ` \u00b7 ${p.content} non-excluded` : ""} \u00b7 ${p.book} word positions ${fmt(p.s)}\u2013${fmt(p.e)}</div>` +
+    (p.also ? `<span class="tag">Also matches ${p.also}</span>` : "") + `<p class="greek" lang="grc">${h}</p></section>`;
+  d.innerHTML = `<h3>${PAIRS[s.p][0]} vs ${PAIRS[s.p][1]} \u00b7 section ${s.n}</h3>` + card(s.a, ha) + card(s.b, hb) +
+    `<div class="note">Words spelled identically in both passages are shaded${st.k ? "; common function words are not shaded in content-only settings" : ""}. The match itself was made on ${st.f === "lemma" ? "lemmas" : "normalized forms"}, so inflected variants may match without being shaded.</div>` +
+    relHtml(s, "a") + relHtml(s, "b");
+  d.scrollTop = 0;
+}
+
+$("pairChips").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; cs.pair = +b.dataset.p; applyFilters(); });
+let qTimer = 0;
+$("connQ").addEventListener("input", e => { clearTimeout(qTimer); qTimer = setTimeout(() => { cs.q = e.target.value; applyFilters(); }, 200); });
+$("connSort").addEventListener("change", e => { cs.sort = e.target.value; applyFilters(); });
+$("connTriple").addEventListener("change", e => { cs.triple = e.target.checked; applyFilters(); });
+$("vspacer").addEventListener("click", e => { const r = e.target.closest(".vrow"); if (r) { selectSec(cs.view[+r.dataset.i], false); $("vlist").focus({preventScroll:true}); } });
+$("detail").addEventListener("click", e => { const b = e.target.closest(".rel-i"); if (b) selectById(b.dataset.id); });
+let raf = 0;
+$("vlist").addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; paintList(); }); });
+window.addEventListener("resize", () => { if (st.view === "conn" && cs.data) paintList(); });
+$("vlist").addEventListener("keydown", e => {
+  const n = cs.view.length; if (!n) return;
+  const i = Math.max(0, cs.view.indexOf(cs.sel));
+  const j = {ArrowDown: i + 1, ArrowUp: i - 1, PageDown: i + 10, PageUp: i - 10, Home: 0, End: n - 1}[e.key];
+  if (j === undefined) return;
+  e.preventDefault(); selectSec(cs.view[Math.min(n - 1, Math.max(0, j))], true);
+});
+
+// ---------- Statistical report tab ----------
+const ss = {dir:null, rep:null, token:0, abort:null, loading:null};
+const statCache = new Map();
+function loadStats(e){
+  const dir = dirOf(st.w, st.t);
+  if (ss.loading && ss.loading !== dir) { ss.token++; if (ss.abort) ss.abort.abort(); ss.loading = null; }
+  if (e && e.empty) { paneMsg("stats", "No shared sections were found at these settings, so no statistical report was produced."); return; }
+  if (ss.dir === dir && ss.rep) { paneBody("stats"); return; }
+  if (ss.loading === dir) return;
+  if (statCache.has(dir)) { setStatsData(dir, statCache.get(dir)); return; }
+  paneLoading("stats", "Loading report\u2026");
+  fetchStats(dir);
+}
+async function fetchStats(dir){
+  const token = ++ss.token;
+  if (ss.abort) ss.abort.abort();
+  const ac = ss.abort = new AbortController();
+  ss.loading = dir;
+  try {
+    const raw = await getText(dir, "synoptic_stats.txt", ac.signal);
+    if (token !== ss.token) return;
+    const rep = parseStats(raw);
+    statCache.set(dir, rep);
+    while (statCache.size > 40) statCache.delete(statCache.keys().next().value);
+    ss.loading = null;
+    setStatsData(dir, rep);
+  } catch (err) {
+    if (token !== ss.token || err.name === "AbortError") return;
+    ss.loading = null; paneError("stats", err, dir, "synoptic_stats.txt");
+  }
+}
+function setStatsData(dir, rep){
+  ss.dir = dir; ss.rep = rep;
+  if (!rep.secs.length) { paneMsg("stats", "The report file could not be read.", "err"); return; }
+  $("statMeta").innerHTML = `<b>${esc(cfgLabel())}</b><br>Sections read: ${esc(rep.read)}`;
+  $("statRaw").href = `${dir}/synoptic_stats.txt`;
+  $("statDl").href = `${dir}/synoptic_stats.txt`;
+  $("statNav").innerHTML = rep.secs.map((s, i) => {
+    const short = s.title.replace(/^\d+\.\s*/, "").split(/[:(]/)[0].trim().toLowerCase();
+    return `<button type="button" data-i="${i}">${parseInt(s.title, 10)} ${esc(short.charAt(0).toUpperCase() + short.slice(1))}</button>`;
+  }).join("");
+  $("statScroll").innerHTML = rep.secs.map((s, i) => `<section class="statsec" id="ss${i}"><h3>${esc(s.title)}</h3><pre class="rep">${esc(s.text)}</pre></section>`).join("");
+  $("statScroll").scrollTop = 0;
+  paneBody("stats");
+}
+$("statNav").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const sc = $("statScroll"), el = $("ss" + b.dataset.i);
+  sc.scrollTo({top: el.offsetTop, behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth"});
+});
+$("statCopy").addEventListener("click", async () => {
+  if (!ss.rep) return;
+  const b = $("statCopy");
+  try { await navigator.clipboard.writeText(ss.rep.text); b.textContent = "Copied"; }
+  catch (_) { b.textContent = "Copy failed"; }
+  setTimeout(() => b.textContent = "Copy report", 1600);
+});
+
+function updateHash(){
+  let h = `#c=${st.chart+1}&w=${st.w}&t=${st.t}&f=${st.f}&k=${st.k}&o=${st.o}&v=${st.view}`;
+  if (st.view === "conn" && cs.sel && cs.dir === dirOf(st.w, st.t)) h += `&s=${cs.sel.id}`;
+  history.replaceState(null, "", h);
+}
+
 function render(){
   const ok = resolve();
   const ws = windowsAvail(), ts = ok ? thrAvail(st.w) : [];
@@ -318,23 +809,38 @@ function render(){
     $("thrMin").textContent = ""; $("thrMax").textContent = "";
   }
 
-  const c = CHARTS[st.chart];
-  $("title").textContent = c[1];
-  msg.classList.remove("show");
+  VIEWS.forEach(v => {
+    const on = st.view === v, t = $("tab-" + v);
+    t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1;
+    $(PANEL[v]).hidden = !on;
+  });
+  sel.disabled = st.view !== "charts";
+  $("chartHint").textContent = st.view === "charts" ? "Select one of the 22 chart types" : "Applies to the Charts tab only";
 
   if (!ok) {
+    const t = "No results were generated for this combination of settings. Change a toggle, or re-run generate.ps1 with a longer time limit.";
     $("cap").textContent = "";
     $("open").removeAttribute("href"); $("dl").removeAttribute("href");
-    showMessage("No results were generated for this combination of settings. Change a toggle, or re-run generate_examples.ps1 with a longer time limit.");
+    $("title").textContent = CHARTS[st.chart][1];
+    showMessage(t); paneMsg("conn", t); paneMsg("stats", t);
     setStats(null);
     return;
   }
 
-  const e = entry();
-  const label = `Window ${st.w}, threshold ${st.t} \u00b7 ${st.f === "lemma" ? "Lemma" : "Normalized"} \u00b7 ${st.k ? "Content words only" : "All words"} \u00b7 Word order ${st.o ? "respected" : "ignored"}`;
+  const e = entry(), label = cfgLabel();
   $("cap").textContent = label;
-  history.replaceState(null, "", `#c=${st.chart+1}&w=${st.w}&t=${st.t}&f=${st.f}&k=${st.k}&o=${st.o}`);
   setStats(e);
+  updateHash();
+  if (st.view === "charts") renderCharts(e, label);
+  else if (st.view === "conn") loadConn(e);
+  else loadStats(e);
+}
+render.token = 0;
+
+function renderCharts(e, label){
+  const c = CHARTS[st.chart], ts = thrAvail(st.w);
+  $("title").textContent = c[1];
+  msg.classList.remove("show");
 
   if (e && e.empty) {
     $("open").removeAttribute("href"); $("dl").removeAttribute("href");
@@ -354,7 +860,7 @@ function render(){
   };
   probe.onerror = () => {
     if (token !== render.token) return;
-    showMessage("Image not found. Place this file at the repository root so that the examples/ folder is beside it, and run generate_examples.ps1 if the folder is empty.");
+    showMessage("Image not found. Place this file at the repository root so that the examples/ folder is beside it, and run generate.ps1 if the folder is empty.");
   };
   probe.src = u;
 
@@ -363,7 +869,7 @@ function render(){
   [ti-1, ti+1].forEach(j => { if (ts[j] !== undefined) preload(imgUrl(st.w, ts[j], st.chart)); });
   [st.chart-1, st.chart+1].forEach(j => { if (CHARTS[j]) preload(imgUrl(st.w, st.t, j)); });
 }
-render.token = 0;
+
 
 function setStats(e){
   const dash = "\u2013";
@@ -404,6 +910,7 @@ $("next").onclick = () => { st.chart = (st.chart + 1) % CHARTS.length; render();
 img.onclick = () => { $("big").src = img.src; $("dlg").showModal(); };
 $("dlg").onclick = () => $("dlg").close();
 document.addEventListener("keydown", e => {
+  if (st.view !== "charts") return;
   const tag = document.activeElement && document.activeElement.tagName;
   if (tag === "INPUT" || tag === "SELECT") return;
   if (e.key === "ArrowUp") { $("prev").click(); e.preventDefault(); }
@@ -415,13 +922,23 @@ document.addEventListener("keydown", e => {
   }
 });
 
+document.querySelectorAll(".tabs button").forEach(b => {
+  b.onclick = () => { st.view = b.dataset.v; render(); };
+  b.onkeydown = e => {
+    const i = VIEWS.indexOf(st.view);
+    const j = e.key === "ArrowRight" ? (i + 1) % 3 : e.key === "ArrowLeft" ? (i + 2) % 3 : -1;
+    if (j < 0) return;
+    e.preventDefault(); st.view = VIEWS[j]; render(); $("tab-" + VIEWS[j]).focus();
+  };
+});
+
 // availability note
 (function(){
   if (MANIFEST) {
     const n = Object.keys(MANIFEST.combos).length;
     $("avail").textContent = `${n} of ${MANIFEST.expected} setting combinations available. Missing combinations exceeded the time or memory limit during generation.`;
   } else {
-    $("avail").textContent = "examples/manifest.js was not found, so all combinations are assumed to exist and statistics are hidden. Run generate_examples.ps1 to create it.";
+    $("avail").textContent = "examples/manifest.js was not found, so all combinations are assumed to exist and statistics are hidden. Run generate.ps1 to create it.";
   }
 })();
 
@@ -431,6 +948,8 @@ if (h.c && CHARTS[h.c-1]) st.chart = h.c - 1;
 if (h.f === "lemma" || h.f === "norm") st.f = h.f;
 if (h.k === "0" || h.k === "1") st.k = +h.k;
 if (h.o === "0" || h.o === "1") st.o = +h.o;
+if (VIEWS.includes(h.v)) st.view = h.v;
+if (h.s) initialSel = h.s;
 if (h.w) st.w = +h.w;
 if (h.t) st.t = +h.t; else st.t = Math.round(st.w / 2);
 resolve(st.t);
