@@ -67,7 +67,7 @@
 #>
 [CmdletBinding()]
 param(
-    [int[]]$Windows = @(6, 8, 10, 12, 14, 16, 18, 20),
+    [int[]]$Windows = @(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
     [int]$MaxParallel = [Math]::Max(1, [Math]::Min(8, [Environment]::ProcessorCount - 1)),
     [double]$TimeoutMinutes = 15,
     [double]$MaxMemoryGB = 6,
