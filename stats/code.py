@@ -19,6 +19,13 @@ settings as command-line options (see --help).
 
 Charts
   PNG images are saved to MEDIA_DIR. They need matplotlib (pip install matplotlib).
+  21 images are written. File names keep their original numbers (01-18, 20-22);
+  number 19 (the former radar chart) is no longer produced.
+
+  Every chart adapts to the data, so any window and threshold works: section
+  length bins are chosen from the observed range, length axes switch to a log
+  scale when lengths span a wide range, and marker size and transparency
+  shrink as the number of sections grows.
 
 Terminology
   "Covered" words are words of a book that fall inside any overlap section.
@@ -181,6 +188,72 @@ def spearman(x, y):
     return num / den if den else None
 
 
+# Candidate bin edges, from finest to coarsest. The first set that gives no
+# more than max_bins bins over the observed range is used.
+NICE_CUT_SETS = [
+    [6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200, 300, 500, 750, 1000],
+    [10, 15, 20, 30, 50, 75, 100, 150, 200, 300, 500, 750, 1000, 1500, 2000, 5000],
+    [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000],
+    [10, 100, 1000, 10000, 100000],
+]
+
+
+def length_bins(lengths, max_bins=9):
+    """Bins for section lengths chosen from the observed range.
+
+    Returns (bins, names): bins are inclusive (lo, hi) pairs that together
+    cover every length from min(lengths) to max(lengths)."""
+    if not lengths:
+        return [(0, 0)], ["-"]
+    lo, hi = min(lengths), max(lengths)
+    for cand in NICE_CUT_SETS:
+        cuts = [c for c in cand if lo < c <= hi]
+        if len(cuts) + 1 <= max_bins:
+            break
+    while len(cuts) + 1 > max_bins:
+        cuts = cuts[1::2]
+    edges = [lo] + cuts
+    bins = [(edges[i], edges[i + 1] - 1) for i in range(len(edges) - 1)] + [(edges[-1], hi)]
+    names = [str(a) if a == b else "%d-%d" % (a, b) for a, b in bins]
+    return bins, names
+
+
+def bin_counts(values, bins):
+    return [sum(1 for v in values if a <= v <= b) for a, b in bins]
+
+
+def wide_range(values, ratio=8.0):
+    """True when values span enough of a range that a log axis reads better."""
+    return bool(values) and min(values) > 0 and max(values) / min(values) >= ratio
+
+
+def point_style(count, size=24.0, alpha=0.6, ref=300, min_size=6.0, min_alpha=0.2):
+    """Marker size and alpha that shrink as the number of points grows."""
+    if count <= ref:
+        return size, alpha
+    f = (ref / float(count)) ** 0.5
+    return max(min_size, size * f), max(min_alpha, alpha * f)
+
+
+def set_length_axis(ax, values, axis="x"):
+    """Use a log axis with plain-number tick labels when lengths span widely."""
+    if not wide_range(values):
+        return
+    from matplotlib.ticker import FixedLocator, NullFormatter, NullLocator
+    lo, hi = min(values), max(values)
+    ticks = [t for t in (1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
+                         10000, 20000, 50000) if lo * 0.8 <= t <= hi * 1.25]
+    ticks = sorted(set([lo] + ticks + [hi]))
+    # drop interior ticks that would crowd an end tick
+    ticks = [t for t in ticks if t in (lo, hi) or (t / lo >= 1.3 and hi / t >= 1.3)]
+    a = ax.xaxis if axis == "x" else ax.yaxis
+    (ax.set_xscale if axis == "x" else ax.set_yscale)("log")
+    a.set_major_locator(FixedLocator(ticks))
+    a.set_major_formatter(lambda v, _pos: "%d" % round(v))
+    a.set_minor_locator(NullLocator())
+    a.set_minor_formatter(NullFormatter())
+
+
 def table(rows, header, aligns=None):
     """Plain-text table. rows: list of lists of strings."""
     cols = len(header)
@@ -234,7 +307,8 @@ def make_charts(media_dir, n, chap, cov, covcount, venn, metrics):
             if x != y:
                 mat[i, j] = pct(covcount[x][y], n[x])
     fig, ax = plt.subplots(figsize=(6.2, 5))
-    im = ax.imshow(mat, cmap="Blues", vmin=0, vmax=np.nanmax(mat) * 1.15)
+    vmax = max(float(np.nanmax(mat)), 1.0)
+    im = ax.imshow(mat, cmap="Blues", vmin=0, vmax=vmax * 1.15)
     ax.set_xticks(range(3), BOOKS)
     ax.set_yticks(range(3), BOOKS)
     ax.set_xlabel("...is found in")
@@ -242,7 +316,7 @@ def make_charts(media_dir, n, chap, cov, covcount, venn, metrics):
     for i in range(3):
         for j in range(3):
             txt = "-" if i == j else "%.1f%%" % mat[i, j]
-            dark = i != j and mat[i, j] > np.nanmax(mat) * 0.6
+            dark = i != j and mat[i, j] > vmax * 0.6
             ax.text(j, i, txt, ha="center", va="center", fontsize=13,
                     color="white" if dark else "black")
     for sp in ax.spines.values():
@@ -319,16 +393,22 @@ def make_charts(media_dir, n, chap, cov, covcount, venn, metrics):
                loc="upper center", ncol=3, frameon=False)
     save(fig, "04_overlap_barcode.png")
 
-    # 5. section length distribution
-    bins = [(10, 14), (15, 19), (20, 29), (30, 49), (50, 99), (100, 10 ** 9)]
-    names = ["10-14", "15-19", "20-29", "30-49", "50-99", "100+"]
-    fig, ax = plt.subplots(figsize=(9, 4.5))
+    # 5. section length distribution (bins chosen from the observed lengths)
+    bins, names = length_bins([m["length"] for m in metrics])
+    fig, ax = plt.subplots(figsize=(max(9, 1.3 * len(bins) + 2), 4.5))
     width = 0.26
+    peak = 0
     for k, pr in enumerate(PAIRS):
-        counts = [sum(1 for m in metrics if m["pair"] == pr and lo <= m["length"] <= hi)
-                  for lo, hi in bins]
-        ax.bar([x + (k - 1) * width for x in range(len(bins))], counts, width,
-               color=pair_col[pr], label="%s - %s" % (ABBR[pr[0]], ABBR[pr[1]]))
+        counts = bin_counts([m["length"] for m in metrics if m["pair"] == pr], bins)
+        peak = max([peak] + counts)
+        xs = [x + (k - 1) * width for x in range(len(bins))]
+        ax.bar(xs, counts, width, color=pair_col[pr],
+               label="%s - %s" % (ABBR[pr[0]], ABBR[pr[1]]))
+        for x, c in zip(xs, counts):
+            if c:
+                ax.text(x, c, format(c, ","), ha="center", va="bottom", fontsize=7,
+                        color="#555555")
+    ax.set_ylim(0, max(peak, 1) * 1.12)
     ax.set_xticks(range(len(bins)), names)
     ax.set_xlabel("Words in the longer passage")
     ax.set_ylabel("Number of sections")
@@ -342,8 +422,9 @@ def make_charts(media_dir, n, chap, cov, covcount, venn, metrics):
         ms = [m for m in metrics if m["pair"] == (a, b)]
         xs = [m["pa"]["start"] for m in ms]
         ys = [m["pb"]["start"] for m in ms]
+        size, alpha = point_style(len(xs), size=16, alpha=0.7, min_size=4)
         ax.scatter([x / n[a] * 100 for x in xs], [y / n[b] * 100 for y in ys],
-                   s=16, alpha=0.7, color=pair_col[(a, b)])
+                   s=size, alpha=alpha, color=pair_col[(a, b)], linewidths=0)
         ax.plot([0, 100], [0, 100], ls="--", color="#999999", lw=1)
         rho = spearman(xs, ys)
         ax.set_title("%s vs %s%s" % (a, b, "\nSpearman rho = %.3f" % rho if rho is not None else ""))
@@ -360,10 +441,14 @@ def make_charts(media_dir, n, chap, cov, covcount, venn, metrics):
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.6), sharey=True)
     for ax, key, label in ((axes[0], "lex", "Lexical overlap (%)"),
                            (axes[1], "seq", "Sequence similarity (%)")):
-        data = [[m[key] for m in metrics if m["pair"] == pr] for pr in PAIRS]
-        bp = ax.boxplot(data, positions=range(len(PAIRS)), widths=0.55, patch_artist=True,
-                        medianprops={"color": "black"})
-        for patch, pr in zip(bp["boxes"], PAIRS):
+        present = [(i, pr, [m[key] for m in metrics if m["pair"] == pr])
+                   for i, pr in enumerate(PAIRS)]
+        present = [t for t in present if t[2]]
+        bp = ax.boxplot([t[2] for t in present], positions=[t[0] for t in present],
+                        widths=0.55, patch_artist=True, medianprops={"color": "black"},
+                        flierprops={"markersize": 2.5, "alpha": 0.35,
+                                    "markeredgewidth": 0.5})
+        for patch, pr in zip(bp["boxes"], [t[1] for t in present]):
             patch.set_facecolor(pair_col[pr])
             patch.set_alpha(0.8)
         ax.set_xticks(range(len(PAIRS)), ["%s - %s" % (ABBR[a], ABBR[b]) for a, b in PAIRS])
@@ -510,6 +595,7 @@ def make_extra_charts(media_dir, n, chap, verse, cov, covcount, metrics):
         from matplotlib.patches import Patch, Wedge, Rectangle, PathPatch
         from matplotlib.path import Path
         from matplotlib.lines import Line2D
+        from matplotlib.collections import PatchCollection
         import numpy as np
     except ImportError:
         return []
@@ -621,18 +707,25 @@ def make_extra_charts(media_dir, n, chap, verse, cov, covcount, metrics):
         ax.add_patch(Rectangle((0, ymap[b] - H / 2), n[b], H, fc=book_col[b], ec="none", zorder=3))
         ax.text(-maxn * 0.012, ymap[b], b, ha="right", va="center", fontweight="bold",
                 color=book_col[b], fontsize=12)
-    for m in metrics:
-        A, B = m["pair"]
-        xa0, xa1 = m["pa"]["start"], m["pa"]["end"] + 1
-        xb0, xb1 = m["pb"]["start"], m["pb"]["end"] + 1
+    rib_codes = [Path.MOVETO, Path.CURVE4, Path.CURVE4, Path.CURVE4, Path.LINETO,
+                 Path.CURVE4, Path.CURVE4, Path.CURVE4, Path.CLOSEPOLY]
+    for A, B in PAIRS:
+        ms = [m for m in metrics if m["pair"] == (A, B)]
+        if not ms:
+            continue
         ya, yb = ymap[A] - H / 2, ymap[B] + H / 2
         ym = (ya + yb) / 2
-        verts = [(xa0, ya), (xa0, ym), (xb0, ym), (xb0, yb), (xb1, yb), (xb1, ym),
-                 (xa1, ym), (xa1, ya), (xa0, ya)]
-        codes = [Path.MOVETO, Path.CURVE4, Path.CURVE4, Path.CURVE4, Path.LINETO,
-                 Path.CURVE4, Path.CURVE4, Path.CURVE4, Path.CLOSEPOLY]
-        ax.add_patch(PathPatch(Path(verts, codes), fc=pair_col[(A, B)], ec=pair_col[(A, B)],
-                               lw=0.4, alpha=0.4, zorder=2))
+        patches = []
+        for m in ms:
+            xa0, xa1 = m["pa"]["start"], m["pa"]["end"] + 1
+            xb0, xb1 = m["pb"]["start"], m["pb"]["end"] + 1
+            verts = [(xa0, ya), (xa0, ym), (xb0, ym), (xb0, yb), (xb1, yb), (xb1, ym),
+                     (xa1, ym), (xa1, ya), (xa0, ya)]
+            patches.append(PathPatch(Path(verts, rib_codes)))
+        _, alpha = point_style(len(ms), alpha=0.4, ref=200, min_alpha=0.03)
+        ax.add_collection(PatchCollection(patches, fc=pair_col[(A, B)], ec=pair_col[(A, B)],
+                                          lw=0.3, alpha=alpha, zorder=2,
+                                          match_original=False))
     ax.set_xlim(-maxn * 0.1, maxn * 1.01)
     ax.set_ylim(-0.3, 2.3)
     ax.set_yticks([])
@@ -665,7 +758,6 @@ def make_extra_charts(media_dir, n, chap, verse, cov, covcount, metrics):
     save(fig, "11_chapter_heatmaps.png")
 
     # ---- 12. verse grid
-    vgrid = {}
     fig, axes = plt.subplots(3, 1, figsize=(14, 13), gridspec_kw={"height_ratios": [28, 16, 24]})
     cmap = plt.get_cmap("YlOrRd").copy()
     cmap.set_bad("#EFEFEF")
@@ -676,7 +768,6 @@ def make_extra_charts(media_dir, n, chap, verse, cov, covcount, metrics):
             words[chap[b][i] - 1, verse[b][i] - 1] += 1
             covw[chap[b][i] - 1, verse[b][i] - 1] += union[b][i]
         frac = np.where(words > 0, covw / np.maximum(words, 1), np.nan)
-        vgrid[b] = frac
         im = ax.imshow(np.ma.masked_invalid(frac), cmap=cmap, vmin=0, vmax=1, aspect="auto")
         ax.set_yticks(range(nch), [str(i + 1) for i in range(nch)], fontsize=7)
         ax.set_xticks(range(0, maxv, 5), [str(i + 1) for i in range(0, maxv, 5)], fontsize=8)
@@ -763,16 +854,24 @@ def make_extra_charts(media_dir, n, chap, verse, cov, covcount, metrics):
     for yi, (A, B) in enumerate(PAIRS):
         pa_, pb_ = pct(covcount[A][B], n[A]), pct(covcount[B][A], n[B])
         ax.plot([pa_, pb_], [yi, yi], color="#BBBBBB", lw=4, zorder=1)
-        ax.scatter([pa_], [yi], s=170, color=book_col[A], zorder=3)
-        ax.scatter([pb_], [yi], s=170, color=book_col[B], zorder=3)
-        ax.text(pa_, yi - 0.25, "%.1f%%" % pa_, ha="center", color=book_col[A], fontsize=9)
-        ax.text(pb_, yi - 0.25, "%.1f%%" % pb_, ha="center", color=book_col[B], fontsize=9)
+        ax.scatter([pa_], [yi], s=170, color=book_col[A], zorder=3, clip_on=False)
+        ax.scatter([pb_], [yi], s=170, color=book_col[B], zorder=3, clip_on=False)
+        # one label above its dot and one below, so close values never collide
+        for val, bk, up in ((pa_, A, True), (pb_, B, False)):
+            ax.annotate("%.1f%%" % val, (val, yi), xytext=(0, 11 if up else -11),
+                        textcoords="offset points", va="bottom" if up else "top",
+                        ha="left" if val < 4 else "right" if val > 96 else "center",
+                        color=book_col[bk], fontsize=9)
     ax.set_yticks(range(len(PAIRS)), ["%s - %s" % p for p in PAIRS])
     ax.invert_yaxis()
+    allv = [pct(covcount[A][B], n[A]) for A in BOOKS for B in BOOKS if A != B]
+    ax.set_xlim(max(0, 10 * int((min(allv) - 12) // 10)), 100)
+    ax.set_ylim(len(PAIRS) - 0.4, -0.6)
     ax.set_xlabel("% of the book's words found in the other book")
     ax.set_title("Overlap is directional: a shorter book is covered more heavily")
     ax.legend(handles=[Line2D([], [], marker="o", ls="", color=book_col[b], label=b, markersize=9)
-                       for b in BOOKS], frameon=False, loc="lower right")
+                       for b in BOOKS], frameon=False, loc="upper center",
+              bbox_to_anchor=(0.5, -0.16), ncol=3)
     save(fig, "16_asymmetry_dumbbell.png")
 
     # ---- 17. stacked area along each book
@@ -812,67 +911,70 @@ def make_extra_charts(media_dir, n, chap, verse, cov, covcount, metrics):
         if len(L):
             ax2.step(L, np.arange(1, len(L) + 1) / len(L) * 100, where="post", lw=2,
                      color=pair_col[pr], label="%s - %s" % (ABBR[pr[0]], ABBR[pr[1]]))
-    ax2.set_xlabel("Section length (words)")
+    set_length_axis(ax2, [m["length"] for m in metrics])
+    ax2.set_xlabel("Section length (words)%s" % (
+        ", log scale" if wide_range([m["length"] for m in metrics]) else ""))
     ax2.set_ylabel("% of sections this long or shorter")
     ax2.set_title("Cumulative distribution of section length")
     ax2.legend(frameon=False)
     fig.tight_layout()
     save(fig, "18_cumulative_and_ecdf.png")
 
-    # ---- 19. radar
-    labels = ["Any overlap", "Triple tradition", "Verses touched",
-              "Verses 50%+ covered", "Mean verbal\nagreement"]
-    angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
-    fig = plt.figure(figsize=(7.5, 7.5))
-    ax = fig.add_subplot(111, polar=True)
-    for b in BOOKS:
-        fr = vgrid[b][~np.isnan(vgrid[b])]
-        seqs = [m["seq"] for m in metrics if b in m["pair"]]
-        vals = [100 - pct(counts[b]["unique"], n[b]), pct(counts[b]["triple"], n[b]),
-                pct(int((fr > 0).sum()), len(fr)), pct(int((fr >= 0.5).sum()), len(fr)),
-                statistics.mean(seqs) if seqs else 0]
-        ax.plot(angles + angles[:1], vals + vals[:1], color=book_col[b], lw=2, label=b)
-        ax.fill(angles + angles[:1], vals + vals[:1], color=book_col[b], alpha=0.15)
-    ax.set_xticks(angles, labels)
-    ax.set_ylim(0, 100)
-    ax.set_yticks([20, 40, 60, 80], ["20%", "40%", "60%", "80%"], fontsize=8)
-    ax.legend(loc="upper right", bbox_to_anchor=(1.2, 1.1), frameon=False)
-    ax.set_title("Profile of each Gospel", y=1.1)
-    save(fig, "19_radar.png")
-
     # ---- 20. section length vs similarity
     fig, ax = plt.subplots(figsize=(9.5, 5.6))
-    for pr in PAIRS:
-        ms = [m for m in metrics if m["pair"] == pr]
-        ax.scatter([m["length"] for m in ms], [m["seq"] for m in ms], s=24, alpha=0.6,
-                   color=pair_col[pr], label="%s - %s" % (ABBR[pr[0]], ABBR[pr[1]]))
-    if len(metrics) > 2:
-        xs_all = np.array([m["length"] for m in metrics], dtype=float)
-        ys_all = np.array([m["seq"] for m in metrics], dtype=float)
+    # Draw all pairs in one shuffled pass so no pair hides another.
+    order_ = np.random.default_rng(0).permutation(len(metrics))
+    size, alpha = point_style(len(metrics))
+    ax.scatter([metrics[i]["length"] for i in order_], [metrics[i]["seq"] for i in order_],
+               s=size, alpha=alpha, linewidths=0,
+               c=[pair_col[metrics[i]["pair"]] for i in order_])
+    handles = [Line2D([], [], marker="o", ls="", color=pair_col[pr], markersize=6,
+                      label="%s - %s" % (ABBR[pr[0]], ABBR[pr[1]]))
+               for pr in PAIRS if any(m["pair"] == pr for m in metrics)]
+    xs_all = np.array([m["length"] for m in metrics], dtype=float)
+    ys_all = np.array([m["seq"] for m in metrics], dtype=float)
+    if len(metrics) > 2 and np.ptp(xs_all) > 0 and np.ptp(ys_all) > 0:
         coef = np.polyfit(xs_all, ys_all, 1)
         r = np.corrcoef(xs_all, ys_all)[0, 1]
-        grid = np.linspace(xs_all.min(), xs_all.max(), 50)
-        ax.plot(grid, np.polyval(coef, grid), color="#333333", ls="--", lw=1.5,
-                label="trend (r = %.2f)" % r)
-    ax.set_xlabel("Section length (words, longer passage)")
+        grid = np.linspace(xs_all.min(), xs_all.max(), 200)
+        handles += ax.plot(grid, np.polyval(coef, grid), color="#333333", ls="--", lw=1.5,
+                           label="linear trend (r = %.2f)" % r)
+        # median similarity per length bin, which is robust when points pile up
+        bins_, _names = length_bins(list(xs_all.astype(int)), max_bins=12)
+        mx, my = [], []
+        for lo_, hi_ in bins_:
+            sel_ = ys_all[(xs_all >= lo_) & (xs_all <= hi_)]
+            if len(sel_):
+                mx.append((lo_ + hi_) / 2.0)
+                my.append(float(np.median(sel_)))
+        if len(mx) > 1:
+            handles += ax.plot(mx, my, color="black", marker="D", ms=4, lw=1.2,
+                               label="median by length bin")
+    set_length_axis(ax, [m["length"] for m in metrics])
+    ax.set_xlabel("Section length (words, longer passage%s)" % (
+        "; log scale" if wide_range([m["length"] for m in metrics]) else ""))
     ax.set_ylabel("Sequence similarity (%)")
     ax.set_title("Do longer sections agree more closely?")
     ax.set_ylim(0, 105)
-    ax.legend(frameon=False)
+    ax.legend(handles=handles, frameon=False)
     save(fig, "20_length_vs_similarity.png")
 
     # ---- 21. similarity distributions
     fig, axes = plt.subplots(1, 2, figsize=(12.5, 4.6), sharey=True)
-    bins = np.arange(0, 105, 5)
+    # Bins are centred on multiples of 5 so that the coarse values short sections
+    # produce (e.g. 50%, 66.7%, 100%) fall inside a bin rather than on an edge.
+    bins = np.arange(-2.5, 105, 5)
     for ax, key, label in ((axes[0], "lex", "Lexical overlap (%)"),
                            (axes[1], "seq", "Sequence similarity (%)")):
         for pr in PAIRS:
             vals = [m[key] for m in metrics if m["pair"] == pr]
             if vals:
-                ax.hist(vals, bins=bins, histtype="step", lw=2.2, density=True, color=pair_col[pr],
-                        label="%s - %s" % (ABBR[pr[0]], ABBR[pr[1]]))
+                ax.hist(vals, bins=bins, histtype="step", lw=2.2, color=pair_col[pr],
+                        weights=[100.0 / len(vals)] * len(vals),
+                        label="%s - %s (%s)" % (ABBR[pr[0]], ABBR[pr[1]], format(len(vals), ",")))
         ax.set_xlabel(label)
-    axes[0].set_ylabel("Density")
+        ax.set_xlim(-2.5, 102.5)
+    axes[0].set_ylabel("% of the pair's sections")
     axes[0].legend(frameon=False, loc="upper left")
     fig.suptitle("Shape of the agreement distributions inside shared sections")
     fig.tight_layout()
@@ -885,8 +987,9 @@ def make_extra_charts(media_dir, n, chap, verse, cov, covcount, metrics):
         c = pair_col[m["pair"]]
         ax.hlines(i, 0, m["length"], color=c, lw=2.2)
         ax.scatter(m["length"], i, s=70, color=c, zorder=3)
-        ax.text(m["length"] + 0.8, i, "%d words, %.0f%% sim." % (m["length"], m["seq"]),
-                va="center", fontsize=8, color="#555555")
+        ax.annotate("%d words, %.0f%% sim." % (m["length"], m["seq"]), (m["length"], i),
+                    xytext=(7, 0), textcoords="offset points", va="center", fontsize=8,
+                    color="#555555")
     ax.set_yticks(range(len(top)), ["%s %s  /  %s %s" % (ABBR[m["pair"][0]], m["pa"]["ref"],
                                                        ABBR[m["pair"][1]], m["pb"]["ref"])
                                     for m in top])
@@ -894,8 +997,9 @@ def make_extra_charts(media_dir, n, chap, verse, cov, covcount, metrics):
     ax.set_xlabel("Words in the longer passage")
     ax.set_title("The 15 longest shared sections")
     ax.legend(handles=[Patch(color=pair_col[p], label="%s - %s" % (ABBR[p[0]], ABBR[p[1]]))
-                       for p in PAIRS], frameon=False, loc="lower right")
-    ax.set_xlim(0, max(m["length"] for m in top) * 1.22 if top else 1)
+                       for p in PAIRS], frameon=False, loc="upper center",
+              bbox_to_anchor=(0.5, -0.1), ncol=3)
+    ax.set_xlim(0, max(m["length"] for m in top) * 1.3 if top else 1)
     save(fig, "22_longest_sections.png")
 
     return saved
@@ -1062,8 +1166,7 @@ def main():
 
     # ---- 6. length histogram
     title("6. SECTION LENGTH DISTRIBUTION (words in the longer passage)")
-    bins = [(10, 14), (15, 19), (20, 29), (30, 49), (50, 99), (100, 10 ** 9)]
-    names = ["10-14", "15-19", "20-29", "30-49", "50-99", "100+"]
+    bins, names = length_bins([m["length"] for m in metrics])
     rows = []
     for (lo, hi), nm in zip(bins, names):
         row = [nm]
@@ -1071,6 +1174,8 @@ def main():
             row.append(sum(1 for m in metrics if m["pair"] == pr and lo <= m["length"] <= hi))
         row.append(sum(1 for m in metrics if lo <= m["length"] <= hi))
         rows.append(row)
+    rows.append(["Total"] + [sum(1 for m in metrics if m["pair"] == pr) for pr in PAIRS]
+                + [len(metrics)])
     R += table(rows, ["Words"] + ["%s-%s" % (ABBR[a], ABBR[b]) for a, b in PAIRS] + ["All"])
     if metrics:
         L = [m["length"] for m in metrics]
