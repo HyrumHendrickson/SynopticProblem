@@ -36,7 +36,10 @@ input[type=range]::-moz-range-track{height:4px;background:var(--line);border-rad
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 1px var(--accent);margin-top:-8px;cursor:pointer}
 input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 1px var(--accent);cursor:pointer}
 input[type=range]:disabled{opacity:.4}
-.ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+.ticks{position:relative;height:22px;font-size:12px;color:var(--muted);margin-top:2px}
+.tk{position:absolute;top:0;transform:translateX(-50%);padding-top:6px;white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1.2}
+.tk::before{content:"";position:absolute;top:0;left:50%;width:1px;height:4px;background:var(--muted);opacity:.55}
+.tk.minor::before{opacity:.3}
 .hint{font-size:12px;color:var(--muted);margin-top:6px;min-height:18px}
 .seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--bg)}
 .seg button{border:0;border-radius:0;background:transparent;padding:10px 8px;font-size:14px;color:var(--muted)}
@@ -164,7 +167,7 @@ pre.rep{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation M
     <div class="ctl">
       <label for="chart">Chart</label>
       <select id="chart"></select>
-      <div class="hint" id="chartHint">Select one of the 22 chart types</div>
+      <div class="hint" id="chartHint"></div>
     </div>
     <div class="ctl">
       <label for="win">Window size <span class="val" id="winVal"></span></label>
@@ -175,7 +178,7 @@ pre.rep{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation M
     <div class="ctl">
       <label for="thr">Threshold <span class="val" id="thrVal"></span></label>
       <input type="range" id="thr" min="0" value="0">
-      <div class="ticks"><span id="thrMin"></span><span id="thrMax"></span></div>
+      <div class="ticks" id="thrTicks"></div>
       <div class="hint">Shared words required to match</div>
     </div>
     <div class="ctl toggles">
@@ -303,6 +306,7 @@ pre.rep{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation M
 <dialog id="dlg"><img id="big" alt=""></dialog>
 
 <script>
+// File names keep the generator's numbering; 19 (radar) is no longer produced.
 const CHARTS = [
  ["01_directional_overlap","Directional Overlap"],
  ["02_book_composition","Book Composition"],
@@ -322,7 +326,6 @@ const CHARTS = [
  ["16_asymmetry_dumbbell","Asymmetry Dumbbell"],
  ["17_overlap_along_book_area","Overlap Along Book"],
  ["18_cumulative_and_ecdf","Cumulative and ECDF"],
- ["19_radar","Radar"],
  ["20_length_vs_similarity","Length vs Similarity"],
  ["21_similarity_distribution","Similarity Distribution"],
  ["22_longest_sections","Longest Sections"]
@@ -449,10 +452,10 @@ if (MANIFEST) {
     addCombo(+w, +t, f, +k, +o);
   });
 } else {
-  [5,10,15,20].forEach(w => {
+  for (let w = 6; w <= 20; w++) {
     for (let t = Math.ceil(w/3); t <= w; t++)
       ["lemma","norm"].forEach(f => [1,0].forEach(k => [0,1].forEach(o => addCombo(w,t,f,k,o))));
-  });
+  }
 }
 Object.values(idx).forEach(byW => Object.values(byW).forEach(a => a.sort((x,y) => x-y)));
 
@@ -784,6 +787,21 @@ function updateHash(){
   history.replaceState(null, "", h);
 }
 
+// Tick marks aligned with the slider's stops. Every stop gets a mark; labels are
+// shown for all stops when there are few, otherwise for the ends and for
+// multiples of 5 that are not crowding an end label.
+function drawTicks(el, vals){
+  const n = vals.length;
+  const show = new Set([0, n - 1]);
+  if (n <= 9) vals.forEach((_, i) => show.add(i));
+  else vals.forEach((v, i) => { if (v % 5 === 0 && i >= 2 && i <= n - 3) show.add(i); });
+  el.innerHTML = vals.map((v, i) => {
+    const f = n > 1 ? i / (n - 1) : 0.5;
+    const on = show.has(i);
+    return `<span class="tk${on ? "" : " minor"}" style="left:calc(10px + (100% - 20px) * ${f})">${on ? v : ""}</span>`;
+  }).join("");
+}
+
 function render(){
   const ok = resolve();
   const ws = windowsAvail(), ts = ok ? thrAvail(st.w) : [];
@@ -801,12 +819,12 @@ function render(){
   if (ok) {
     win.max = ws.length - 1; win.value = ws.indexOf(st.w);
     thr.max = ts.length - 1; thr.value = ts.indexOf(st.t);
-    $("winTicks").innerHTML = ws.map(w => `<span>${w}</span>`).join("");
+    drawTicks($("winTicks"), ws);
+    drawTicks($("thrTicks"), ts);
     $("winVal").textContent = st.w; $("thrVal").textContent = st.t;
-    $("thrMin").textContent = ts[0]; $("thrMax").textContent = ts[ts.length-1];
   } else {
-    $("winTicks").innerHTML = ""; $("winVal").textContent = "\u2013"; $("thrVal").textContent = "\u2013";
-    $("thrMin").textContent = ""; $("thrMax").textContent = "";
+    $("winTicks").innerHTML = ""; $("thrTicks").innerHTML = "";
+    $("winVal").textContent = "\u2013"; $("thrVal").textContent = "\u2013";
   }
 
   VIEWS.forEach(v => {
@@ -815,7 +833,7 @@ function render(){
     $(PANEL[v]).hidden = !on;
   });
   sel.disabled = st.view !== "charts";
-  $("chartHint").textContent = st.view === "charts" ? "Select one of the 22 chart types" : "Applies to the Charts tab only";
+  $("chartHint").textContent = st.view === "charts" ? `Select one of the ${CHARTS.length} chart types` : "Applies to the Charts tab only";
 
   if (!ok) {
     const t = "No results were generated for this combination of settings. Change a toggle, or re-run generate.ps1 with a longer time limit.";
