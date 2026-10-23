@@ -80,7 +80,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $Inv = [Globalization.CultureInfo]::InvariantCulture
-$ExpectedImages = 22
+$ExpectedImages = 21
 
 $Root = $PSScriptRoot
 if (-not $Root) { $Root = (Get-Location).Path }
