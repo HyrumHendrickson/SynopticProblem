@@ -1,0 +1,318 @@
+SYNOPTIC OVERLAP STATISTICS
+Overlap file: C:\Users\HyrumH.guru\Desktop\SynopticProblem\examples\Window16\Threshold15\Lemma_AllWords_OrderOff\synoptic_overlaps.txt
+Overlap settings: Window: 16 raw words | Threshold: 15 shared words | Compared on: lemma | Word order: ignored
+Sections read: 128 (Mt-Mk 58, Mt-Lk 40, Mk-Lk 30)
+
+==========================================================================
+1. BOOK SIZES
+==========================================================================
+Book     Words  Chapters  Verses
+-------  -----  --------  ------
+Matthew  18329        28    1068
+Mark     11286        16     673
+Luke     19446        24    1149
+Total    49061                  
+
+==========================================================================
+2. DIRECTIONAL OVERLAP: % of one book found in another
+==========================================================================
+Cell = share of the ROW book's words that lie inside a section shared with the COLUMN book.
+
+% of ... in ...  Matthew   Mark   Luke
+---------------  -------  -----  -----
+Matthew                -  7.31%  6.06%
+Mark              11.90%      -  5.65%
+Luke               5.74%  3.27%      -
+
+Headline figures:
+  Luke     in Mark    :   3.27%  (635 of 19446 words)
+  Mark     in Matthew :  11.90%  (1343 of 11286 words)
+  Matthew  in Luke    :   6.06%  (1111 of 18329 words)
+  Mark     in Luke    :   5.65%  (638 of 11286 words)
+  Matthew  in Mark    :   7.31%  (1339 of 18329 words)
+  Luke     in Matthew :   5.74%  (1117 of 19446 words)
+
+==========================================================================
+3. OVERALL OVERLAP (unique words, counted once per book)
+==========================================================================
+Book       Words  Words in any overlap  % of book  Share of all overlap
+---------  -----  --------------------  ---------  --------------------
+Matthew    18329                  2314     12.62%                40.73%
+Mark       11286                  1782     15.79%                31.36%
+Luke       19446                  1586      8.16%                27.91%
+All three  49061                  5682     11.58%               100.00%
+
+Share of all overlap = that book's covered words / covered words in all three books.
+
+==========================================================================
+4. WHO SHARES WHAT: overlap with one other book vs both
+==========================================================================
+For each book, its words split by which other book(s) also contain them.
+
+Matthew (18329 words)
+  Category                             Words  % of book
+  -----------------------------------  -----  ---------
+  Shared with Mark only                 1203      6.56%
+  Shared with Luke only                  975      5.32%
+  Shared with both (triple tradition)    136      0.74%
+  No overlap (unique to Matthew)       16015     87.38%
+  Of Matthew's words shared with Mark, 10.2% are also in Luke.
+  Of Matthew's words shared with Luke, 12.2% are also in Mark.
+
+Mark (11286 words)
+  Category                             Words  % of book
+  -----------------------------------  -----  ---------
+  Shared with Matthew only              1144     10.14%
+  Shared with Luke only                  439      3.89%
+  Shared with both (triple tradition)    199      1.76%
+  No overlap (unique to Mark)           9504     84.21%
+  Of Mark's words shared with Matthew, 14.8% are also in Luke.
+  Of Mark's words shared with Luke, 31.2% are also in Matthew.
+
+Luke (19446 words)
+  Category                             Words  % of book
+  -----------------------------------  -----  ---------
+  Shared with Matthew only               951      4.89%
+  Shared with Mark only                  469      2.41%
+  Shared with both (triple tradition)    166      0.85%
+  No overlap (unique to Luke)          17860     91.84%
+  Of Luke's words shared with Matthew, 14.9% are also in Mark.
+  Of Luke's words shared with Mark, 26.1% are also in Matthew.
+
+
+==========================================================================
+5. PAIR SUMMARY
+==========================================================================
+Pair            Sections  % of sections  Words (1st)  Words (2nd)  Similarity*  Mean len  Median len  Longest
+--------------  --------  -------------  -----------  -----------  -----------  --------  ----------  -------
+Matthew - Mark        58          45.3%         1339         1343        9.06%      23.5          21       58
+Matthew - Luke        40          31.2%         1111         1117        5.90%      28.3          26       67
+Mark - Luke           30          23.4%          638          635        4.14%      21.5          18       46
+
+* Similarity = (covered words in both books) / (total words in both books),
+  a Dice-style symmetric measure. Section length = the longer of its two passages.
+
+==========================================================================
+6. SECTION LENGTH DISTRIBUTION (words in the longer passage)
+==========================================================================
+Words  Mt-Mk  Mt-Lk  Mk-Lk  All
+-----  -----  -----  -----  ---
+16-19     26     10     18   54
+20-24     12      7      7   26
+25-29     10     10      1   21
+30-39      6      8      2   16
+40-49      3      3      2    8
+50-67      1      2      0    3
+Total     58     40     30  128
+
+All sections: mean 24.5, median 21, st. dev. 9.5, min 16, max 67
+
+==========================================================================
+7. VERBAL AGREEMENT WITHIN SECTIONS
+==========================================================================
+Lexical overlap = shared words / words in the shorter passage (order ignored).
+Sequence similarity = order-sensitive match ratio between the two word lists.
+Accents and punctuation are ignored in both.
+
+Pair            Mean lexical  Median lexical  Mean sequence  Median sequence  Near-verbatim (>=90%)  Loose (<60%)
+--------------  ------------  --------------  -------------  ---------------  ---------------------  ------------
+Matthew - Mark         84.2%           86.3%          78.4%            80.3%                      8             5
+Matthew - Luke         87.4%           89.1%          83.0%            86.1%                     10             2
+Mark - Luke            83.7%           82.8%          78.1%            79.4%                      2             1
+All                    85.1%           87.2%          79.8%            81.3%                     20             8
+
+==========================================================================
+8. ORDER AGREEMENT: do parallel passages appear in the same order?
+==========================================================================
+Spearman rho compares the order of sections in the two books (1.0 = identical order, 0 = unrelated).
+In-order steps = share of consecutive sections (by first book) whose second-book position also moves forward.
+
+Pair            Sections  Spearman rho  In-order steps
+--------------  --------  ------------  --------------
+Matthew - Mark        58         0.928           94.7%
+Matthew - Luke        40         0.730           69.2%
+Mark - Luke           30         0.984           96.6%
+
+==========================================================================
+9. VERSE-LEVEL COVERAGE (any overlap, either partner)
+==========================================================================
+Book     Verses  Touched by overlap  >=50% covered  Fully covered
+-------  ------  ------------------  -------------  -------------
+Matthew    1068         200 (18.7%)    126 (11.8%)      64 (6.0%)
+Mark        673         159 (23.6%)    101 (15.0%)      39 (5.8%)
+Luke       1149         123 (10.7%)      83 (7.2%)      37 (3.2%)
+
+==========================================================================
+10. COVERAGE BY CHAPTER (any overlap, either partner)
+==========================================================================
+
+Matthew
+  Ch  Words  Covered      %             
+  --  -----  -------  -----  -----------
+  1     436        0   0.0%             
+  2     457        0   0.0%             
+  3     331      122  36.9%  ###########
+  4     428       46  10.7%  ###        
+  5     821        0   0.0%             
+  6     648       66  10.2%  ###        
+  7     516      101  19.6%  ######     
+  8     583      140  24.0%  #######    
+  9     647      131  20.2%  ######     
+  10    720       54   7.5%  ##         
+  11    493      186  37.7%  ###########
+  12    906      150  16.6%  #####      
+  13   1076      137  12.7%  ####       
+  14    559       61  10.9%  ###        
+  15    609      103  16.9%  #####      
+  16    526       90  17.1%  #####      
+  17    496       44   8.9%  ###        
+  18    669        0   0.0%             
+  19    536       51   9.5%  ###        
+  20    539      117  21.7%  #######    
+  21    864       97  11.2%  ###        
+  22    662       66  10.0%  ###        
+  23    655       41   6.3%  ##         
+  24    824      299  36.3%  ###########
+  25    753        0   0.0%             
+  26   1240      172  13.9%  ####       
+  27   1006       40   4.0%  #          
+  28    329        0   0.0%             
+  Highest: 11 (38%), 3 (37%), 24 (36%)
+  Lowest:  28 (0%), 25 (0%), 18 (0%)
+
+Mark
+  Ch  Words  Covered      %                
+  --  -----  -------  -----  --------------
+  1     701      114  16.3%  #####         
+  2     542      145  26.8%  ########      
+  3     535       17   3.2%  #             
+  4     683      125  18.3%  #####         
+  5     698       26   3.7%  #             
+  6     983       87   8.9%  ###           
+  7     603       61  10.1%  ###           
+  8     632      102  16.1%  #####         
+  9     859       87  10.1%  ###           
+  10    881      263  29.9%  #########     
+  11    566       58  10.2%  ###           
+  12    793      170  21.4%  ######        
+  13    604      280  46.4%  ##############
+  14   1200      190  15.8%  #####         
+  15    669       57   8.5%  ###           
+  16    337        0   0.0%                
+  Highest: 13 (46%), 10 (30%), 2 (27%)
+  Lowest:  16 (0%), 3 (3%), 5 (4%)
+
+Luke
+  Ch  Words  Covered      %         
+  --  -----  -------  -----  -------
+  1    1186        0   0.0%         
+  2     849        0   0.0%         
+  3     587      142  24.2%  #######
+  4     768       76   9.9%  ###    
+  5     750      117  15.6%  #####  
+  6     923       38   4.1%  #      
+  7     889      143  16.1%  #####  
+  8    1086       17   1.6%         
+  9    1150      173  15.0%  #####  
+  10    788      140  17.8%  #####  
+  11    977      178  18.2%  #####  
+  12   1042      115  11.0%  ###    
+  13    660       24   3.6%  #      
+  14    607        0   0.0%         
+  15    564        0   0.0%         
+  16    595       29   4.9%  #      
+  17    568       16   2.8%  #      
+  18    681      124  18.2%  #####  
+  19    753       16   2.1%  #      
+  20    699      134  19.2%  ###### 
+  21    586       72  12.3%  ####   
+  22   1082       16   1.5%         
+  23    847       16   1.9%  #      
+  24    809        0   0.0%         
+  Highest: 3 (24%), 20 (19%), 11 (18%)
+  Lowest:  24 (0%), 15 (0%), 14 (0%)
+
+==========================================================================
+11. WHERE IN THE BOOK? coverage by tenth of the text
+==========================================================================
+
+Matthew
+  Part     Covered         
+  -------  -------  -------
+  0-10%       9.2%  ###    
+  10-20%      9.9%  ###    
+  20-30%     17.0%  #####  
+  30-40%     22.5%  #######
+  40-50%     11.3%  ###    
+  50-60%      8.2%  ##     
+  60-70%     14.5%  ####   
+  70-80%     11.7%  ####   
+  80-90%     18.1%  #####  
+  90-100%     4.0%  #      
+
+Mark
+  Part     Covered             
+  -------  -------  -----------
+  0-10%      23.0%  #######    
+  10-20%     11.5%  ###        
+  20-30%      5.6%  ##         
+  30-40%      9.3%  ###        
+  40-50%     16.8%  #####      
+  50-60%     15.2%  #####      
+  60-70%     18.7%  ######     
+  70-80%     35.9%  ###########
+  80-90%     16.8%  #####      
+  90-100%     5.0%  ##         
+
+Luke
+  Part     Covered        
+  -------  -------  ------
+  0-10%       0.0%        
+  10-20%     15.4%  ##### 
+  20-30%     11.2%  ###   
+  30-40%      6.3%  ##    
+  40-50%     19.8%  ######
+  50-60%      7.2%  ##    
+  60-70%      1.5%        
+  70-80%      9.0%  ###   
+  80-90%     10.5%  ###   
+  90-100%     0.8%        
+
+==========================================================================
+12. NOTABLE SECTIONS
+==========================================================================
+Longest sections:
+  Matthew 3:7-3:11 <-> Luke 3:7-3:10  (66 / 67 words, lexical 91%, sequence 90%)
+  Matthew 24:31-24:34 <-> Mark 13:27-13:30  (58 / 58 words, lexical 88%, sequence 84%)
+  Matthew 24:45-24:49 <-> Luke 12:42-12:45  (50 / 49 words, lexical 90%, sequence 85%)
+  Matthew 11:20-11:23 <-> Luke 10:12-10:15  (48 / 47 words, lexical 89%, sequence 88%)
+  Matthew 8:8-8:10 <-> Luke 7:7-7:9  (46 / 46 words, lexical 91%, sequence 91%)
+  Mark 10:17-10:20 <-> Luke 18:18-18:21  (46 / 45 words, lexical 93%, sequence 81%)
+  Mark 10:14-10:16 <-> Luke 18:15-18:18  (44 / 45 words, lexical 93%, sequence 85%)
+  Matthew 16:24-16:25 <-> Mark 8:34-8:35  (42 / 42 words, lexical 90%, sequence 88%)
+  Matthew 13:3-13:5 <-> Mark 4:3-4:5  (40 / 41 words, lexical 72%, sequence 72%)
+  Matthew 27:37-27:40 <-> Mark 15:26-15:30  (40 / 41 words, lexical 82%, sequence 79%)
+
+Most similar (sections of 15+ words):
+  Matthew 10:21-10:23 <-> Mark 13:12-13:14  (36 / 36 words, lexical 94%, sequence 94%)
+  Matthew 24:15-24:17 <-> Mark 13:14-13:15  (18 / 18 words, lexical 94%, sequence 94%)
+  Matthew 9:14-9:15 <-> Mark 2:18-2:19  (17 / 17 words, lexical 94%, sequence 94%)
+  Matthew 11:25-11:27 <-> Luke 10:21-10:22  (40 / 41 words, lexical 95%, sequence 94%)
+  Matthew 26:23-26:24 <-> Mark 14:21-14:22  (32 / 32 words, lexical 94%, sequence 94%)
+  Matthew 7:11 <-> Luke 11:13  (16 / 16 words, lexical 94%, sequence 94%)
+  Mark 1:24-1:26 <-> Luke 4:34-4:35  (30 / 30 words, lexical 93%, sequence 93%)
+  Matthew 6:23-6:25 <-> Luke 16:13-16:14  (29 / 29 words, lexical 93%, sequence 93%)
+  Matthew 24:49-24:51 <-> Luke 12:45-12:46  (29 / 29 words, lexical 93%, sequence 93%)
+  Matthew 12:40-12:42 <-> Luke 11:31-11:33  (26 / 26 words, lexical 92%, sequence 92%)
+
+Least similar (sections of 15+ words; worth checking by hand):
+  Matthew 23:6-23:7 <-> Mark 12:38-12:40  (17 / 18 words, lexical 88%, sequence 46%)
+  Matthew 24:38 <-> Luke 17:27  (16 / 16 words, lexical 62%, sequence 50%)
+  Matthew 4:3-4:4 <-> Luke 4:3  (17 / 17 words, lexical 65%, sequence 53%)
+  Matthew 13:22 <-> Mark 4:18-4:19  (25 / 23 words, lexical 57%, sequence 54%)
+  Matthew 19:13-19:14 <-> Mark 10:14  (23 / 24 words, lexical 87%, sequence 55%)
+  Mark 1:41-1:42 <-> Luke 5:13-5:14  (16 / 16 words, lexical 81%, sequence 56%)
+  Matthew 15:35-15:36 <-> Mark 8:6  (17 / 18 words, lexical 71%, sequence 57%)
+  Matthew 9:17 <-> Mark 2:22  (16 / 18 words, lexical 69%, sequence 59%)
+  Matthew 21:39-21:40 <-> Luke 20:15-20:16  (16 / 17 words, lexical 81%, sequence 61%)
+  Matthew 15:26-15:27 <-> Mark 7:27-7:28  (18 / 18 words, lexical 72%, sequence 61%)
