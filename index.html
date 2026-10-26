@@ -452,7 +452,7 @@ if (MANIFEST) {
     addCombo(+w, +t, f, +k, +o);
   });
 } else {
-  for (let w = 6; w <= 20; w++) {
+  for (let w = 6; w <= 30; w++) {
     for (let t = Math.ceil(w/3); t <= w; t++)
       ["lemma","norm"].forEach(f => [1,0].forEach(k => [0,1].forEach(o => addCombo(w,t,f,k,o))));
   }
@@ -461,7 +461,7 @@ Object.values(idx).forEach(byW => Object.values(byW).forEach(a => a.sort((x,y) =
 
 const $ = id => document.getElementById(id);
 const sel=$("chart"), win=$("win"), thr=$("thr"), img=$("img"), box=$("box"), msg=$("msg");
-const st = {chart:0, w:10, t:5, f:"lemma", k:1, o:0, view:"charts"};
+const st = {chart:7, w:15, t:8, f:"norm", k:1, o:1, view:"charts"};
 
 const group = () => idx[`${st.f}|${st.k}|${st.o}`] || {};
 const windowsAvail = () => Object.keys(group()).map(Number).sort((a,b)=>a-b);

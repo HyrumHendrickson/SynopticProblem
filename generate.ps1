@@ -67,7 +67,7 @@
 #>
 [CmdletBinding()]
 param(
-    [int[]]$Windows = @(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
+    [int[]]$Windows = @(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30),
     [int]$MaxParallel = [Math]::Max(1, [Math]::Min(8, [Environment]::ProcessorCount - 1)),
     [double]$TimeoutMinutes = 15,
     [double]$MaxMemoryGB = 6,
@@ -120,7 +120,7 @@ function New-Combo($w, $t, $field, $content, $order) {
 
 $all = New-Object System.Collections.ArrayList
 foreach ($w in $Windows) {
-    $tMin = [int][Math]::Ceiling($w / 3.0)
+    $tMin = [int][Math]::Ceiling($w / 4.0)
     foreach ($t in $tMin..$w) {
         foreach ($field in 'lemma', 'norm') {
             foreach ($content in $true, $false) {
