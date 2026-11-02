@@ -22,15 +22,15 @@
     to know which combinations exist and to show section counts and directional
     overlap without opening each report.
 
-    Each run is capped by a time limit and a memory limit. Combinations that
-    exceed either limit are killed, removed, and listed in
-    examples/generation_report.txt. Very low thresholds, especially with content
-    only turned off, can produce tens of millions of matching windows and are
-    the usual cause. Completed combinations are skipped on re-run, so the
+    Each run is capped by a time limit, a memory limit, and a size limit on the
+    overlap text file. Combinations that exceed any limit are killed, removed, and
+    listed in examples/generation_report.txt. Very low thresholds, especially with
+    content only turned off, can produce tens of millions of matching windows and
+    are the usual cause. Completed combinations are skipped on re-run, so the
     script can be interrupted and resumed. Use -Force to regenerate everything.
 
 .PARAMETER Windows
-    Window sizes to generate. Default: 5, 10, 15, 20.
+    Window sizes to generate.
 
 .PARAMETER MaxParallel
     Number of Python processes to run at once.
@@ -41,6 +41,11 @@
 .PARAMETER MaxMemoryGB
     Memory limit for each Python process.
 
+.PARAMETER MaxOverlapMB
+    Size limit for synoptic_overlaps.txt. If the file grows past this while the
+    overlap step is running, the process is killed and the combination is
+    recorded as failed. Set to 0 to disable.
+
 .PARAMETER Python
     Path to a Python 3 executable. Detected automatically if omitted.
 
@@ -49,7 +54,7 @@
 
 .PARAMETER SkipOverlapText
     Delete synoptic_overlaps.txt after the statistics are produced, to save
-    disk space. Some low-threshold overlap files exceed 10 MB each.
+    disk space.
 
 .PARAMETER ListOnly
     Print the number of combinations and exit.
@@ -63,14 +68,15 @@
     .\generate_examples.ps1
 
 .EXAMPLE
-    .\generate_examples.ps1 -MaxParallel 8 -TimeoutMinutes 30
+    .\generate.ps1 -MaxParallel 8 -TimeoutMinutes 30 -MaxOverlapMB 10
 #>
 [CmdletBinding()]
 param(
-    [int[]]$Windows = @(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30),
+    [int[]]$Windows = @(5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30),
     [int]$MaxParallel = [Math]::Max(1, [Math]::Min(8, [Environment]::ProcessorCount - 1)),
-    [double]$TimeoutMinutes = 15,
-    [double]$MaxMemoryGB = 6,
+    [double]$TimeoutMinutes = 30,
+    [double]$MaxMemoryGB = 2,
+    [double]$MaxOverlapMB = 10,
     [string]$Python = '',
     [switch]$Force,
     [switch]$SkipOverlapText,
@@ -120,7 +126,7 @@ function New-Combo($w, $t, $field, $content, $order) {
 
 $all = New-Object System.Collections.ArrayList
 foreach ($w in $Windows) {
-    $tMin = [int][Math]::Ceiling($w / 4.0)
+    $tMin = [Math]::Max(1, [int][Math]::Ceiling($w / 5))
     foreach ($t in $tMin..$w) {
         foreach ($field in 'lemma', 'norm') {
             foreach ($content in $true, $false) {
@@ -258,8 +264,9 @@ if ($First -gt 0) {
     $queue = $limited
 }
 $Total = $queue.Count
-Write-Host ("{0} to run, {1} already complete. Parallel: {2}. Limits per step: {3} min, {4} GB." -f `
-        $Total, $Counts.Skipped, $MaxParallel, $TimeoutMinutes, $MaxMemoryGB)
+$sizeLimitText = if ($MaxOverlapMB -gt 0) { '{0} MB overlap file' -f $MaxOverlapMB } else { 'no overlap file size limit' }
+Write-Host ("{0} to run, {1} already complete. Parallel: {2}. Limits per step: {3} min, {4} GB, {5}." -f `
+        $Total, $Counts.Skipped, $MaxParallel, $TimeoutMinutes, $MaxMemoryGB, $sizeLimitText)
 
 # -------------------------------------------------------------------- run
 $active = New-Object System.Collections.ArrayList
@@ -286,14 +293,25 @@ try {
                 $elapsed = ((Get-Date) - $task.StepStart).TotalMinutes
                 $mem = 0
                 try { $p.Refresh(); $mem = $p.WorkingSet64 } catch { }
+
+                # Size of the overlap file while the overlap step is writing it.
+                $size = 0
+                if ($MaxOverlapMB -gt 0 -and $task.Step -eq 'overlap') {
+                    try { $size = (Get-Item -Path $c.OverlapFile -ErrorAction Stop).Length } catch { }
+                }
+
                 $reason = ''
                 if ($elapsed -gt $TimeoutMinutes) {
                     $reason = 'exceeded {0} min during {1}' -f $TimeoutMinutes, $task.Step
                 } elseif ($mem -gt ($MaxMemoryGB * 1GB)) {
                     $reason = 'exceeded {0} GB during {1}' -f $MaxMemoryGB, $task.Step
+                } elseif ($size -gt ($MaxOverlapMB * 1MB)) {
+                    $reason = 'overlap file exceeded {0} MB' -f $MaxOverlapMB
                 }
                 if ($reason) {
                     try { $p.Kill() } catch { }
+                    # Wait so Windows releases the file handle before the directory is removed.
+                    try { $null = $p.WaitForExit(5000) } catch { }
                     [void]$active.Remove($task)
                     Complete-Task $task 'FAIL' $reason
                 }
@@ -312,6 +330,12 @@ try {
                 if (-not (Test-HasSections $c.OverlapFile)) {
                     [void]$active.Remove($task)
                     Complete-Task $task 'EMPTY' 'no sections at these settings'
+                    continue
+                }
+                # The process may have finished between polls with an oversized file.
+                if ($MaxOverlapMB -gt 0 -and (Get-Item -Path $c.OverlapFile).Length -gt ($MaxOverlapMB * 1MB)) {
+                    [void]$active.Remove($task)
+                    Complete-Task $task 'FAIL' ('overlap file exceeded {0} MB' -f $MaxOverlapMB)
                     continue
                 }
                 Start-Step $task 'stats'
@@ -387,7 +411,7 @@ $report = New-Object System.Collections.ArrayList
 [void]$report.Add(('This run: {0} generated, {1} empty, {2} failed, {3} skipped (already complete)' -f $Counts.Done, $Counts.Empty, $Counts.Failed, $Counts.Skipped))
 if ($Failures.Count -gt 0) {
     [void]$report.Add('')
-    [void]$report.Add(('Failed in this run (limits: {0} min, {1} GB):' -f $TimeoutMinutes, $MaxMemoryGB))
+    [void]$report.Add(('Failed in this run (limits: {0} min, {1} GB, {2}):' -f $TimeoutMinutes, $MaxMemoryGB, $sizeLimitText))
     foreach ($f in $Failures) { [void]$report.Add('  ' + $f) }
 }
 Set-Content -Path (Join-Path $ExamplesDir 'generation_report.txt') -Value $report -Encoding UTF8
@@ -397,5 +421,5 @@ Write-Host ''
 Write-Host ('Finished in {0:N1} min. {1} of {2} combinations available, {3} failed, {4} empty. examples/ is {5} MB.' -f `
         ((Get-Date) - $clock).TotalMinutes, $available, $all.Count, $Counts.Failed, $Counts.Empty, $sizeMB)
 if ($Failures.Count -gt 0) {
-    Write-Host 'Failures are listed in examples/generation_report.txt. Re-run to retry them, optionally with a larger -TimeoutMinutes.' -ForegroundColor Yellow
+    Write-Host 'Failures are listed in examples/generation_report.txt. Re-run to retry them, optionally with a larger -TimeoutMinutes or -MaxOverlapMB.' -ForegroundColor Yellow
 }
