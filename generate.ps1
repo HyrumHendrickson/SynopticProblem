@@ -126,7 +126,7 @@ function New-Combo($w, $t, $field, $content, $order) {
 
 $all = New-Object System.Collections.ArrayList
 foreach ($w in $Windows) {
-    $tMin = [Math]::Max(1, [int][Math]::Ceiling($w / 5))
+    $tMin = 3
     foreach ($t in $tMin..$w) {
         foreach ($field in 'lemma', 'norm') {
             foreach ($content in $true, $false) {
