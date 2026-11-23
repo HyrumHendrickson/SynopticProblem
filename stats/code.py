@@ -575,7 +575,7 @@ def make_charts(media_dir, n, chap, cov, covcount, venn, metrics):
     box("Mark and Luke", 13, BUS_Y, 24, 7.5, slice_col["MkLk"])
     box("Mark and Matthew", 87, BUS_Y, 24, 7.5, slice_col["MtMk"])
     box("Triple Tradition", 50, 64, 22, 8, slice_col["triple"])
-    box("Matthew and Luke", 50, 14, 22, 7.5, slice_col["MtLk"])
+    box("Matthew and Luke", 50, 14, 28, 7.5, slice_col["MtLk"])
     box("Unique to Luke", ulx, 14, 24, 7.5, unique_col["Luke"])
     box("Unique to Matthew", urx, 14, 24, 7.5, unique_col["Matthew"])
     ax.text(50, -1.5, "Each circle is one Gospel; slices show the share of its words that also appear in the "
